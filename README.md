@@ -2,6 +2,8 @@
 
 > **Add Google-level search to your Postgres database in 5 minutes** — for your apps and AI agents.
 
+![pg_textsearch Demo](./app-image.png)
+
 This demo showcases [Tiger Data's `pg_textsearch`](https://www.timescale.com/blog/introducing-pg_textsearch-true-bm25-ranking-hybrid-retrieval-postgres/) extension, which brings **BM25 ranking** and **hybrid search** directly into PostgreSQL.
 
 ## Why This Matters
