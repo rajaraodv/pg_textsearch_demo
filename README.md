@@ -1,8 +1,23 @@
-# pg_textsearch Demo
+<p align="center">
+  <img src="./banner.png" alt="pg_textsearch - Google-level search for PostgreSQL" width="100%">
+</p>
 
-> **Add Google-level search to your Postgres database in 5 minutes** — for your apps and AI agents.
+<h1 align="center">pg_textsearch Demo</h1>
 
-![pg_textsearch Demo](./app-image.png)
+<p align="center">
+  <strong>Add Google-level search to your PostgreSQL database in 5 minutes</strong><br>
+  BM25 ranking • Hybrid search • Built for apps and AI agents
+</p>
+
+<p align="center">
+  <a href="https://www.timescale.com/blog/introducing-pg_textsearch-true-bm25-ranking-hybrid-retrieval-postgres/">Blog</a> •
+  <a href="https://docs.timescale.com/use-timescale/latest/extensions/pg-textsearch/">Docs</a> •
+  <a href="https://console.cloud.timescale.com">Tiger Data Console</a>
+</p>
+
+---
+
+![Demo Screenshot](./app-image.png)
 
 This demo showcases [Tiger Data's `pg_textsearch`](https://www.timescale.com/blog/introducing-pg_textsearch-true-bm25-ranking-hybrid-retrieval-postgres/) extension, which brings **BM25 ranking** and **hybrid search** directly into PostgreSQL.
 
