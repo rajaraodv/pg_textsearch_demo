@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# pg_textsearch Demo
 
-## Getting Started
+> **Add Google-level search to your Postgres database in 5 minutes** — for your apps and AI agents.
 
-First, run the development server:
+This demo showcases [Tiger Data's `pg_textsearch`](https://www.timescale.com/blog/introducing-pg_textsearch-true-bm25-ranking-hybrid-retrieval-postgres/) extension, which brings **BM25 ranking** and **hybrid search** directly into PostgreSQL.
+
+## Why This Matters
+
+| Native PostgreSQL | BM25 (pg_textsearch) |
+|-------------------|----------------------|
+| ❌ Boolean AND — missing one term excludes the doc | ✅ Ranked retrieval — all relevant docs scored |
+| ❌ No IDF — common words weighted same as rare | ✅ Rare terms get higher importance |
+| ❌ Long docs always win | ✅ Length normalization for fair ranking |
+| ❌ Keyword stuffing games rankings | ✅ Term frequency saturation prevents gaming |
+
+**Plus:** Combine with `pgvectorscale` for **hybrid search** — keyword + semantic in one query!
+
+---
+
+## Quick Start (5 minutes)
+
+### 1. Create a Tiger Data Service
+
+Sign up at [console.cloud.timescale.com](https://console.cloud.timescale.com) and create a new service.
+
+### 2. Clone & Install
+
+```bash
+git clone https://github.com/rajaraodv/pg_textsearch_demo.git
+cd pg_textsearch_demo
+npm install
+```
+
+### 3. Configure Environment
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` with your credentials:
+
+```env
+DATABASE_URL=postgresql://tsdbadmin:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT/tsdb?sslmode=require
+OPENAI_API_KEY=sk-proj-your-openai-api-key
+```
+
+### 4. Setup Database
+
+```bash
+node scripts/setup-database.js
+```
+
+This will:
+- Enable `pg_textsearch` and `pgvectorscale` extensions
+- Create the documents table with sample data
+- Generate OpenAI embeddings for vector search
+- Create BM25 and DiskANN indexes
+
+### 5. Run the Demo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) and try the demo queries!
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Demo Scenarios
+
+### Traditional Search
+- **"database connection pooling"** — Shows Boolean AND limitation
+- **"database authentication"** — Demonstrates IDF (rare term weighting)
+- **"explain analyze postgresql"** — Shows length normalization
+
+### AI Agent Queries
+- **"make database faster"** — Hybrid combines keyword + semantic
+- **"fix connection pool problems"** — Native fails, BM25/Vector work
+- **"secure my postgres database"** — Natural language → technical docs
+
+---
+
+## Tech Stack
+
+- **Next.js 15** — React framework
+- **Tiger Data** — PostgreSQL cloud with extensions
+- **pg_textsearch** — BM25 full-text search
+- **pgvectorscale** — Vector search with DiskANN
+- **OpenAI** — text-embedding-3-small for embeddings
+
+---
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+- [pg_textsearch Documentation](https://docs.timescale.com/use-timescale/latest/extensions/pg-textsearch/)
+- [Tiger Data Console](https://console.cloud.timescale.com)
+- [Blog: Introducing pg_textsearch](https://www.timescale.com/blog/introducing-pg_textsearch-true-bm25-ranking-hybrid-retrieval-postgres/)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
