@@ -476,8 +476,30 @@ export default function Home() {
           </div>
         </div>
 
-            {/* BM25 Feature Examples */}
+            {/* Agentic Queries */}
             <div className="mb-3">
+              <div className="text-xs uppercase tracking-wider text-[var(--tiger-yellow)] mb-2 font-medium">🤖 Agentic Queries</div>
+              <div className="flex flex-wrap gap-2">
+                {DEMO_QUERIES.filter(q => q.category === 'agent').map((item) => (
+                  <button
+                    key={item.query}
+                    onClick={() => runDemoQuery(item.query, item.highlight)}
+                    disabled={loading}
+                    className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
+                      currentScenario === item.highlight 
+                        ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
+                        : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
+                    }`}
+                    title={item.description}
+                  >
+                    <div className="font-medium font-mono">{item.query}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* BM25 Feature Examples */}
+            <div>
               <div className="text-xs uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">BM25 Feature Examples</div>
               <div className="flex flex-wrap gap-4">
                 <div>
@@ -540,28 +562,6 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Agentic Queries */}
-            <div>
-              <div className="text-xs uppercase tracking-wider text-[var(--tiger-yellow)] mb-2 font-medium">🤖 Agentic Queries</div>
-              <div className="flex flex-wrap gap-2">
-                {DEMO_QUERIES.filter(q => q.category === 'agent').map((item) => (
-          <button
-                    key={item.query}
-                    onClick={() => runDemoQuery(item.query, item.highlight)}
-                    disabled={loading}
-                    className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
-                      currentScenario === item.highlight 
-                        ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
-                        : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
-                    }`}
-                    title={item.description}
-                  >
-                    <div className="font-medium font-mono">{item.query}</div>
-          </button>
-                ))}
               </div>
             </div>
           </div>
