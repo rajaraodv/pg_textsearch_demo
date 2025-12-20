@@ -145,6 +145,13 @@ export default function Home() {
   const [scoreThreshold, setScoreThreshold] = useState(0);
   // Hybrid score threshold filter (0 = disabled, RRF scores are small ~0.01-0.03)
   const [hybridThreshold, setHybridThreshold] = useState(0);
+  // Panel visibility toggles
+  const [showNative, setShowNative] = useState(true);
+  const [showBM25, setShowBM25] = useState(true);
+  const [showVector, setShowVector] = useState(true);
+  const [showHybrid, setShowHybrid] = useState(true);
+  
+  const visiblePanelCount = [showNative, showBM25, showVector, showHybrid].filter(Boolean).length;
 
   const keywordWeight = (100 - hybridMix) / 100;
   const vectorWeight = hybridMix / 100;
@@ -394,8 +401,49 @@ export default function Home() {
             </button>
           </div>
 
+          {/* Panel Visibility Toggles */}
+          <div className="flex items-center gap-4 mb-4">
+            <span className="text-xs text-[var(--tiger-muted)]">Show:</span>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={showNative} 
+                onChange={(e) => setShowNative(e.target.checked)}
+                className="w-3.5 h-3.5 rounded border-[var(--tiger-border)] accent-[var(--tiger-yellow)]"
+              />
+              <span className={`text-xs ${showNative ? 'text-white' : 'text-[var(--tiger-muted)]'}`}>Native</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={showBM25} 
+                onChange={(e) => setShowBM25(e.target.checked)}
+                className="w-3.5 h-3.5 rounded border-[var(--tiger-border)] accent-[var(--tiger-yellow)]"
+              />
+              <span className={`text-xs ${showBM25 ? 'text-[var(--tiger-yellow)] font-medium' : 'text-[var(--tiger-muted)]'}`}>BM25</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={showVector} 
+                onChange={(e) => setShowVector(e.target.checked)}
+                className="w-3.5 h-3.5 rounded border-[var(--tiger-border)] accent-[var(--tiger-yellow)]"
+              />
+              <span className={`text-xs ${showVector ? 'text-white' : 'text-[var(--tiger-muted)]'}`}>Vector</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={showHybrid} 
+                onChange={(e) => setShowHybrid(e.target.checked)}
+                className="w-3.5 h-3.5 rounded border-[var(--tiger-border)] accent-[var(--tiger-yellow)]"
+              />
+              <span className={`text-xs ${showHybrid ? 'text-white' : 'text-[var(--tiger-muted)]'}`}>Hybrid</span>
+            </label>
+          </div>
+
           {/* Demo Queries */}
-          <div className="mt-4 p-4 rounded-lg bg-[var(--tiger-card)] border border-[var(--tiger-border)]">
+          <div className="p-4 rounded-lg bg-[var(--tiger-card)] border border-[var(--tiger-border)]">
             <div className="text-xs text-[var(--tiger-muted)] mb-3">Try these examples to see how different search methods compare:</div>
             
             {/* Keyword Search */}
@@ -563,7 +611,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* 4-Column Results Grid */}
+        {/* Results Grid */}
         <div className="relative">
           {/* Loading Overlay */}
           {loading && (
@@ -575,166 +623,179 @@ export default function Home() {
             </div>
           )}
           
-          <div className="grid lg:grid-cols-4 gap-4">
+          <div className={`grid gap-4 ${
+            visiblePanelCount === 1 ? 'lg:grid-cols-1 max-w-xl' :
+            visiblePanelCount === 2 ? 'lg:grid-cols-2 max-w-3xl' :
+            visiblePanelCount === 3 ? 'lg:grid-cols-3 max-w-5xl' :
+            'lg:grid-cols-4'
+          }`}>
             {/* Column 1: Native PostgreSQL */}
-            <ResultsPanel
-              title="Native PostgreSQL"
-              subtitle="ts_rank + Boolean AND"
-              results={nativeResults}
-              variant="native"
-            />
+            {showNative && (
+              <ResultsPanel
+                title="Native PostgreSQL"
+                subtitle="ts_rank + Boolean AND"
+                results={nativeResults}
+                variant="native"
+              />
+            )}
           
             {/* Column 2: BM25 */}
-            <div className="card p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h2 className="text-sm font-semibold">BM25</h2>
-                  <p className="text-xs text-[var(--tiger-muted)]">pg_textsearch</p>
+            {showBM25 && (
+              <div className="card p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h2 className="text-sm font-semibold">BM25</h2>
+                    <p className="text-xs text-[var(--tiger-muted)]">pg_textsearch</p>
+                  </div>
+                  {bm25Results && 'executionTime' in bm25Results && (
+                    <span className="text-xs text-[var(--tiger-muted)] font-mono">
+                      {bm25Results.executionTime}ms
+                    </span>
+                  )}
                 </div>
-                {bm25Results && 'executionTime' in bm25Results && (
-                  <span className="text-xs text-[var(--tiger-muted)] font-mono">
-                    {bm25Results.executionTime}ms
-                  </span>
+
+                {/* Score Threshold Filter */}
+                <div className="mb-3 p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)]">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs text-[var(--tiger-muted)]">Score Filter</span>
+                    <span className="text-xs font-mono text-[var(--tiger-muted)]">
+                      {scoreThreshold > 0 ? `≥ ${scoreThreshold.toFixed(1)}` : 'Off'}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="3"
+                    step="0.5"
+                    value={scoreThreshold}
+                    onChange={(e) => setScoreThreshold(parseFloat(e.target.value))}
+                    className="w-full"
+                    style={{
+                      background: scoreThreshold > 0 
+                        ? `linear-gradient(to right, var(--tiger-yellow) 0%, var(--tiger-yellow) ${(scoreThreshold/3)*100}%, var(--tiger-border) ${(scoreThreshold/3)*100}%, var(--tiger-border) 100%)`
+                        : 'var(--tiger-border)'
+                    }}
+                  />
+                </div>
+
+                {/* Term Stats */}
+                {bm25Results && 'termStats' in bm25Results && bm25Results.termStats && (
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    {Object.entries(bm25Results.termStats).map(([term, stats]) => (
+                      <span 
+                        key={term}
+                        className={`text-xs px-2 py-1 rounded font-medium ${
+                          stats.docFreq <= 3 
+                            ? 'badge-yellow' 
+                            : 'badge-gray'
+                        }`}
+                      >
+                        {term} ({stats.docFreq}/14)
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <BM25ResultsList results={bm25Results} scoreThreshold={scoreThreshold} />
+                
+                {bm25Results && 'explanation' in bm25Results && bm25Results.explanation && (
+                  <CollapsibleQueryBox explanation={bm25Results.explanation} />
                 )}
               </div>
-
-              {/* Score Threshold Filter */}
-              <div className="mb-3 p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)]">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-[var(--tiger-muted)]">Score Filter</span>
-                  <span className="text-xs font-mono text-[var(--tiger-muted)]">
-                    {scoreThreshold > 0 ? `≥ ${scoreThreshold.toFixed(1)}` : 'Off'}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="3"
-                  step="0.5"
-                  value={scoreThreshold}
-                  onChange={(e) => setScoreThreshold(parseFloat(e.target.value))}
-                  className="w-full"
-                  style={{
-                    background: scoreThreshold > 0 
-                      ? `linear-gradient(to right, var(--tiger-yellow) 0%, var(--tiger-yellow) ${(scoreThreshold/3)*100}%, var(--tiger-border) ${(scoreThreshold/3)*100}%, var(--tiger-border) 100%)`
-                      : 'var(--tiger-border)'
-                  }}
-                />
-              </div>
-
-              {/* Term Stats */}
-              {bm25Results && 'termStats' in bm25Results && bm25Results.termStats && (
-                <div className="mb-3 flex flex-wrap gap-1.5">
-                  {Object.entries(bm25Results.termStats).map(([term, stats]) => (
-                    <span 
-                      key={term}
-                      className={`text-xs px-2 py-1 rounded font-medium ${
-                        stats.docFreq <= 3 
-                          ? 'badge-yellow' 
-                          : 'badge-gray'
-                      }`}
-                    >
-                      {term} ({stats.docFreq}/14)
-                    </span>
-                  ))}
-          </div>
-        )}
-
-              <BM25ResultsList results={bm25Results} scoreThreshold={scoreThreshold} />
-              
-              {bm25Results && 'explanation' in bm25Results && bm25Results.explanation && (
-                <CollapsibleQueryBox explanation={bm25Results.explanation} />
-              )}
-            </div>
+            )}
           
             {/* Column 3: Vector */}
-            <div className="card p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h2 className="text-sm font-semibold">Vector</h2>
-                  <p className="text-xs text-[var(--tiger-muted)]">pgvectorscale + OpenAI</p>
+            {showVector && (
+              <div className="card p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h2 className="text-sm font-semibold">Vector</h2>
+                    <p className="text-xs text-[var(--tiger-muted)]">pgvectorscale + OpenAI</p>
+                  </div>
+                  {vectorResults && 'executionTime' in vectorResults && (
+                    <span className="text-xs text-[var(--tiger-muted)] font-mono">
+                      {vectorResults.executionTime}ms
+                    </span>
+                  )}
                 </div>
-                {vectorResults && 'executionTime' in vectorResults && (
-                  <span className="text-xs text-[var(--tiger-muted)] font-mono">
-                    {vectorResults.executionTime}ms
-                  </span>
+
+                <VectorResultsList results={vectorResults} />
+                
+                {vectorResults && 'explanation' in vectorResults && vectorResults.explanation && (
+                  <CollapsibleQueryBox explanation={vectorResults.explanation} />
                 )}
               </div>
-
-              <VectorResultsList results={vectorResults} />
-              
-              {vectorResults && 'explanation' in vectorResults && vectorResults.explanation && (
-                <CollapsibleQueryBox explanation={vectorResults.explanation} />
-              )}
-            </div>
+            )}
           
             {/* Column 4: Hybrid */}
-            <div className="card p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h2 className="text-sm font-semibold">Hybrid</h2>
-                  <p className="text-xs text-[var(--tiger-muted)]">BM25 + Vector RRF</p>
+            {showHybrid && (
+              <div className="card p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h2 className="text-sm font-semibold">Hybrid</h2>
+                    <p className="text-xs text-[var(--tiger-muted)]">BM25 + Vector RRF</p>
+                  </div>
+                  {hybridResults && 'executionTime' in hybridResults && (
+                    <span className="text-xs text-[var(--tiger-muted)] font-mono">
+                      {hybridResults.executionTime}ms
+                    </span>
+                  )}
                 </div>
-                {hybridResults && 'executionTime' in hybridResults && (
-                  <span className="text-xs text-[var(--tiger-muted)] font-mono">
-                    {hybridResults.executionTime}ms
-                  </span>
+
+                {/* Hybrid Mix Slider */}
+                <div className="mb-3 p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)]">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs text-[var(--tiger-muted)]">BM25</span>
+                    <span className="text-xs text-[var(--tiger-muted)]">Vector</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={hybridMix}
+                    onChange={(e) => setHybridMix(parseInt(e.target.value))}
+                    className="w-full"
+                    style={{
+                      background: `linear-gradient(to right, var(--tiger-yellow) 0%, var(--tiger-yellow) ${hybridMix}%, var(--tiger-border) ${hybridMix}%, var(--tiger-border) 100%)`
+                    }}
+                  />
+                  <div className="flex justify-between mt-1">
+                    <span className="text-xs font-mono text-[var(--tiger-yellow)]">{(keywordWeight * 100).toFixed(0)}%</span>
+                    <span className="text-xs font-mono text-[var(--tiger-muted)]">{(vectorWeight * 100).toFixed(0)}%</span>
+                  </div>
+                </div>
+
+                {/* Hybrid Threshold */}
+                <div className="mb-3 p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)]">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs text-[var(--tiger-muted)]">Score Filter</span>
+                    <span className="text-xs font-mono text-[var(--tiger-muted)]">
+                      {hybridThreshold > 0 ? `≥ ${(hybridThreshold / 1000).toFixed(3)}` : 'Off'}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="30"
+                    step="1"
+                    value={hybridThreshold}
+                    onChange={(e) => setHybridThreshold(parseInt(e.target.value))}
+                    className="w-full"
+                    style={{
+                      background: hybridThreshold > 0 
+                        ? `linear-gradient(to right, var(--tiger-yellow) 0%, var(--tiger-yellow) ${(hybridThreshold/30)*100}%, var(--tiger-border) ${(hybridThreshold/30)*100}%, var(--tiger-border) 100%)`
+                        : 'var(--tiger-border)'
+                    }}
+                  />
+                </div>
+
+                <HybridResultsList results={hybridResults} />
+                
+                {hybridResults && 'explanation' in hybridResults && hybridResults.explanation && (
+                  <CollapsibleQueryBox explanation={hybridResults.explanation} />
                 )}
               </div>
-
-              {/* Hybrid Mix Slider */}
-              <div className="mb-3 p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)]">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-[var(--tiger-muted)]">BM25</span>
-                  <span className="text-xs text-[var(--tiger-muted)]">Vector</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={hybridMix}
-                  onChange={(e) => setHybridMix(parseInt(e.target.value))}
-                  className="w-full"
-                  style={{
-                    background: `linear-gradient(to right, var(--tiger-yellow) 0%, var(--tiger-yellow) ${hybridMix}%, var(--tiger-border) ${hybridMix}%, var(--tiger-border) 100%)`
-                  }}
-                />
-                <div className="flex justify-between mt-1">
-                  <span className="text-xs font-mono text-[var(--tiger-yellow)]">{(keywordWeight * 100).toFixed(0)}%</span>
-                  <span className="text-xs font-mono text-[var(--tiger-muted)]">{(vectorWeight * 100).toFixed(0)}%</span>
-                </div>
-              </div>
-
-              {/* Hybrid Threshold */}
-              <div className="mb-3 p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)]">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-[var(--tiger-muted)]">Score Filter</span>
-                  <span className="text-xs font-mono text-[var(--tiger-muted)]">
-                    {hybridThreshold > 0 ? `≥ ${(hybridThreshold / 1000).toFixed(3)}` : 'Off'}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="30"
-                  step="1"
-                  value={hybridThreshold}
-                  onChange={(e) => setHybridThreshold(parseInt(e.target.value))}
-                  className="w-full"
-                  style={{
-                    background: hybridThreshold > 0 
-                      ? `linear-gradient(to right, var(--tiger-yellow) 0%, var(--tiger-yellow) ${(hybridThreshold/30)*100}%, var(--tiger-border) ${(hybridThreshold/30)*100}%, var(--tiger-border) 100%)`
-                      : 'var(--tiger-border)'
-                  }}
-                />
-              </div>
-
-              <HybridResultsList results={hybridResults} />
-              
-              {hybridResults && 'explanation' in hybridResults && hybridResults.explanation && (
-                <CollapsibleQueryBox explanation={hybridResults.explanation} />
-              )}
-            </div>
+            )}
           </div>
         </div>
 
