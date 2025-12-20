@@ -169,14 +169,6 @@ const DOCUMENTS = [
     category: "comparison"
   },
 
-  // === SPAM DOC (for term saturation demo) ===
-  // Stuffs "connection" keywords for the term saturation demo with "database connection pooling"
-  // Does NOT contain performance/speed keywords to avoid interfering with "make database faster" query
-  {
-    title: "SEO Spam: Connection Tips",
-    content: "Connection connection connection connection connection connection connection connection. Pool pool pool pool pool. Pooling pooling pooling. This document repeats connection keywords excessively to try to game search rankings.",
-    category: "spam"
-  }
 ];
 
 // ============================================================================
