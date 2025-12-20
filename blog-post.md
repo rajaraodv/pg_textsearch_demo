@@ -94,7 +94,7 @@ The long guide has more keyword matches, so native ranks it higher. But the shor
 
 Native Postgres uses Boolean AND by default. If a doc has "connection pooling" but not "database"? No match. Zero results.
 
-BM25 does **partial matching**. Docs matching 2 of 3 terms still rank, just lower than docs matching all 3. You actually get results.
+BM25 does **ranked retrieval**. Docs matching 2 of 3 terms still appear, just ranked lower than docs matching all 3. You get results instead of nothing.
 
 ---
 
