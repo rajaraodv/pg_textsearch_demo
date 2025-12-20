@@ -58,7 +58,7 @@ function ContentSnippet({ content, matchedTerms, maxLength = 120 }: { content: s
   let snippet = content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
   
   if (!matchedTerms || matchedTerms.length === 0) {
-    return <p className="text-[10px] text-[var(--tiger-muted)] mt-1 leading-relaxed">{snippet}</p>;
+    return <p className="text-xs text-[var(--tiger-muted)] mt-1.5 leading-relaxed">{snippet}</p>;
   }
   
   // Create a regex pattern for all matched terms (case insensitive)
@@ -68,11 +68,11 @@ function ContentSnippet({ content, matchedTerms, maxLength = 120 }: { content: s
   const parts = snippet.split(pattern);
   
   return (
-    <p className="text-[10px] text-[var(--tiger-muted)] mt-1 leading-relaxed">
+    <p className="text-xs text-[var(--tiger-muted)] mt-1.5 leading-relaxed">
       {parts.map((part, i) => {
         const isMatch = matchedTerms.some(term => part.toLowerCase() === term.toLowerCase());
         return isMatch ? (
-          <span key={i} className="text-[var(--tiger-yellow)] font-medium">{part}</span>
+          <span key={i} className="text-[var(--tiger-yellow)] font-semibold">{part}</span>
         ) : (
           <span key={i}>{part}</span>
         );
@@ -400,11 +400,11 @@ export default function Home() {
             
             {/* Keyword Search */}
             <div className="mb-3">
-              <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Keyword Search</div>
-              <div className="flex flex-wrap gap-2">
+              <div className="text-xs uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Keyword Search</div>
+          <div className="flex flex-wrap gap-2">
                 {DEMO_QUERIES.filter(q => q.category === 'keyword').map((item) => (
-                  <button
-                    key={item.query}
+              <button
+                key={item.query}
                     onClick={() => runDemoQuery(item.query, item.highlight)}
                     disabled={loading}
                     className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
@@ -412,21 +412,21 @@ export default function Home() {
                         ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
                         : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
                     }`}
-                    title={item.description}
-                  >
+                title={item.description}
+              >
                     <div className="font-medium font-mono">{item.query}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
+              </button>
+            ))}
+          </div>
+        </div>
 
             {/* IDF & Length Normalization */}
             <div className="mb-3 flex flex-wrap gap-4">
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Rare Term Weighting (IDF)</div>
+                <div className="text-xs uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Rare Term Weighting (IDF)</div>
                 <div className="flex flex-wrap gap-2">
                   {DEMO_QUERIES.filter(q => q.category === 'idf').map((item) => (
-                    <button
+          <button
                       key={item.query}
                       onClick={() => runDemoQuery(item.query, item.highlight)}
                       disabled={loading}
@@ -438,15 +438,15 @@ export default function Home() {
                       title={item.description}
                     >
                       <div className="font-medium font-mono">{item.query}</div>
-                    </button>
+          </button>
                   ))}
                 </div>
               </div>
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Length Normalization</div>
+                <div className="text-xs uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Length Normalization</div>
                 <div className="flex flex-wrap gap-2">
                   {DEMO_QUERIES.filter(q => q.category === 'length').map((item) => (
-                    <button
+          <button
                       key={item.query}
                       onClick={() => runDemoQuery(item.query, item.highlight)}
                       disabled={loading}
@@ -458,7 +458,7 @@ export default function Home() {
                       title={item.description}
                     >
                       <div className="font-medium font-mono">{item.query}</div>
-                    </button>
+          </button>
                   ))}
                 </div>
               </div>
@@ -466,10 +466,10 @@ export default function Home() {
 
             {/* Agentic Queries */}
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-yellow)] mb-2 font-medium">🤖 Agentic Queries</div>
+              <div className="text-xs uppercase tracking-wider text-[var(--tiger-yellow)] mb-2 font-medium">🤖 Agentic Queries</div>
               <div className="flex flex-wrap gap-2">
                 {DEMO_QUERIES.filter(q => q.category === 'agent').map((item) => (
-                  <button
+          <button
                     key={item.query}
                     onClick={() => runDemoQuery(item.query, item.highlight)}
                     disabled={loading}
@@ -481,7 +481,7 @@ export default function Home() {
                     title={item.description}
                   >
                     <div className="font-medium font-mono">{item.query}</div>
-                  </button>
+          </button>
                 ))}
               </div>
             </div>
@@ -592,7 +592,7 @@ export default function Home() {
                   <p className="text-xs text-[var(--tiger-muted)]">pg_textsearch</p>
                 </div>
                 {bm25Results && 'executionTime' in bm25Results && (
-                  <span className="text-[10px] text-[var(--tiger-muted)] font-mono">
+                  <span className="text-xs text-[var(--tiger-muted)] font-mono">
                     {bm25Results.executionTime}ms
                   </span>
                 )}
@@ -601,8 +601,8 @@ export default function Home() {
               {/* Score Threshold Filter */}
               <div className="mb-3 p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)]">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] text-[var(--tiger-muted)]">Score Filter</span>
-                  <span className="text-[10px] font-mono text-[var(--tiger-muted)]">
+                  <span className="text-xs text-[var(--tiger-muted)]">Score Filter</span>
+                  <span className="text-xs font-mono text-[var(--tiger-muted)]">
                     {scoreThreshold > 0 ? `≥ ${scoreThreshold.toFixed(1)}` : 'Off'}
                   </span>
                 </div>
@@ -624,21 +624,21 @@ export default function Home() {
 
               {/* Term Stats */}
               {bm25Results && 'termStats' in bm25Results && bm25Results.termStats && (
-                <div className="mb-3 flex flex-wrap gap-1">
+                <div className="mb-3 flex flex-wrap gap-1.5">
                   {Object.entries(bm25Results.termStats).map(([term, stats]) => (
                     <span 
                       key={term}
-                      className={`text-[10px] px-1.5 py-0.5 rounded ${
+                      className={`text-xs px-2 py-1 rounded font-medium ${
                         stats.docFreq <= 3 
                           ? 'badge-yellow' 
                           : 'badge-gray'
                       }`}
                     >
-                      {term} ({stats.docFreq}/10)
+                      {term} ({stats.docFreq}/14)
                     </span>
                   ))}
-                </div>
-              )}
+          </div>
+        )}
 
               <BM25ResultsList results={bm25Results} scoreThreshold={scoreThreshold} />
               
@@ -655,7 +655,7 @@ export default function Home() {
                   <p className="text-xs text-[var(--tiger-muted)]">pgvectorscale + OpenAI</p>
                 </div>
                 {vectorResults && 'executionTime' in vectorResults && (
-                  <span className="text-[10px] text-[var(--tiger-muted)] font-mono">
+                  <span className="text-xs text-[var(--tiger-muted)] font-mono">
                     {vectorResults.executionTime}ms
                   </span>
                 )}
@@ -676,7 +676,7 @@ export default function Home() {
                   <p className="text-xs text-[var(--tiger-muted)]">BM25 + Vector RRF</p>
                 </div>
                 {hybridResults && 'executionTime' in hybridResults && (
-                  <span className="text-[10px] text-[var(--tiger-muted)] font-mono">
+                  <span className="text-xs text-[var(--tiger-muted)] font-mono">
                     {hybridResults.executionTime}ms
                   </span>
                 )}
@@ -685,8 +685,8 @@ export default function Home() {
               {/* Hybrid Mix Slider */}
               <div className="mb-3 p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)]">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] text-[var(--tiger-muted)]">BM25</span>
-                  <span className="text-[10px] text-[var(--tiger-muted)]">Vector</span>
+                  <span className="text-xs text-[var(--tiger-muted)]">BM25</span>
+                  <span className="text-xs text-[var(--tiger-muted)]">Vector</span>
                 </div>
                 <input
                   type="range"
@@ -700,16 +700,16 @@ export default function Home() {
                   }}
                 />
                 <div className="flex justify-between mt-1">
-                  <span className="text-[10px] font-mono text-[var(--tiger-yellow)]">{(keywordWeight * 100).toFixed(0)}%</span>
-                  <span className="text-[10px] font-mono text-[var(--tiger-muted)]">{(vectorWeight * 100).toFixed(0)}%</span>
+                  <span className="text-xs font-mono text-[var(--tiger-yellow)]">{(keywordWeight * 100).toFixed(0)}%</span>
+                  <span className="text-xs font-mono text-[var(--tiger-muted)]">{(vectorWeight * 100).toFixed(0)}%</span>
                 </div>
               </div>
 
               {/* Hybrid Threshold */}
               <div className="mb-3 p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)]">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] text-[var(--tiger-muted)]">Score Filter</span>
-                  <span className="text-[10px] font-mono text-[var(--tiger-muted)]">
+                  <span className="text-xs text-[var(--tiger-muted)]">Score Filter</span>
+                  <span className="text-xs font-mono text-[var(--tiger-muted)]">
                     {hybridThreshold > 0 ? `≥ ${(hybridThreshold / 1000).toFixed(3)}` : 'Off'}
                   </span>
                 </div>
@@ -799,11 +799,11 @@ function ResultsPanel({
     <div className="card p-4">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <h2 className="text-sm font-semibold">{title}</h2>
-          <p className="text-xs text-[var(--tiger-muted)]">{subtitle}</p>
+          <h2 className="text-base font-semibold">{title}</h2>
+          <p className="text-sm text-[var(--tiger-muted)]">{subtitle}</p>
         </div>
         {results && 'executionTime' in results && (
-          <span className="text-[10px] text-[var(--tiger-muted)] font-mono">
+          <span className="text-xs text-[var(--tiger-muted)] font-mono">
             {results.executionTime}ms
           </span>
         )}
@@ -811,12 +811,12 @@ function ResultsPanel({
 
       {/* Native: Show Boolean requirement */}
       {results && 'queryTerms' in results && results.queryTerms && isNative && (
-        <div className="mb-3 flex flex-wrap gap-1 items-center">
+        <div className="mb-3 flex flex-wrap gap-1.5 items-center">
           {results.queryTerms.map((term, i) => (
-            <span key={term} className="flex items-center gap-1">
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--tiger-border)] font-mono">{term}</span>
+            <span key={term} className="flex items-center gap-1.5">
+              <span className="text-xs px-2 py-1 rounded bg-[var(--tiger-border)] font-mono">{term}</span>
               {i < (results.queryTerms?.length || 0) - 1 && (
-                <span className="text-[10px] text-[var(--tiger-error)] font-medium">AND</span>
+                <span className="text-xs text-[var(--tiger-error)] font-bold">AND</span>
               )}
             </span>
           ))}
@@ -828,31 +828,31 @@ function ResultsPanel({
           <svg className="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <p className="text-xs">Run a search</p>
+          <p className="text-sm">Run a search</p>
         </div>
       ) : 'error' in results ? (
         <div className="text-center py-8 text-[var(--tiger-error)]">
-          <p className="text-xs">Error: {(results as unknown as { error: string }).error}</p>
+          <p className="text-sm">Error: {(results as unknown as { error: string }).error}</p>
         </div>
       ) : !results.results || results.results.length === 0 ? (
         <div className="text-center py-8 text-[var(--tiger-muted)]">
-          <p className="text-xs">No results</p>
+          <p className="text-sm font-medium">No results</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {results.results.slice(0, 5).map((result, idx) => (
             <div
               key={result.id}
-              className="p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
+              className="p-3 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
             >
-              <div className="flex items-start gap-2">
-                <div className="w-5 h-5 rounded bg-[var(--tiger-border)] flex items-center justify-center text-[10px] font-medium shrink-0">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded bg-[var(--tiger-border)] flex items-center justify-center text-xs font-bold shrink-0">
                   {idx + 1}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-xs">{result.title}</h3>
-                    <span className="text-[10px] font-mono text-[var(--tiger-muted)] shrink-0">
+                    <h3 className="font-semibold text-sm text-white">{result.title}</h3>
+                    <span className="text-xs font-mono text-[var(--tiger-muted)] shrink-0">
                       {typeof result.score === 'number' 
                         ? result.score.toFixed(3) 
                         : parseFloat(result.score)?.toFixed(3) ?? 'N/A'}
@@ -865,23 +865,23 @@ function ResultsPanel({
                   />
                   
                   {result.matchAnalysis && (
-                    <div className="flex flex-wrap gap-1 mt-1">
+                    <div className="flex flex-wrap gap-1.5 mt-2">
                       {result.matchAnalysis.matchedTerms.slice(0, 3).map(term => (
-                        <span key={term} className="text-[10px] px-1 py-0.5 rounded badge-green">
-                          {term}
-                        </span>
+                        <span key={term} className="text-xs px-2 py-1 rounded badge-green">
+                          ✓ {term}
+                    </span>
                       ))}
                     </div>
                   )}
                   
-                  <span className="text-[10px] text-[var(--tiger-muted)]">{result.category}</span>
+                  <span className="text-xs text-[var(--tiger-muted)] mt-1">{result.category}</span>
                 </div>
               </div>
             </div>
           ))}
           
           {results.results.length > 5 && (
-            <p className="text-[10px] text-[var(--tiger-muted)] text-center pt-1">
+            <p className="text-xs text-[var(--tiger-muted)] text-center pt-2">
               +{results.results.length - 5} more
             </p>
           )}
@@ -902,7 +902,7 @@ function HybridResultsList({ results }: { results: SearchResponse | null }) {
         <svg className="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <p className="text-xs">Run a search</p>
+        <p className="text-sm">Run a search</p>
       </div>
     );
   }
@@ -910,7 +910,7 @@ function HybridResultsList({ results }: { results: SearchResponse | null }) {
   if ('error' in results) {
     return (
       <div className="text-center py-8 text-[var(--tiger-error)]">
-        <p className="text-xs">Error: {(results as unknown as { error: string }).error}</p>
+        <p className="text-sm">Error: {(results as unknown as { error: string }).error}</p>
       </div>
     );
   }
@@ -918,26 +918,26 @@ function HybridResultsList({ results }: { results: SearchResponse | null }) {
   if (!results.results || results.results.length === 0) {
     return (
       <div className="text-center py-8 text-[var(--tiger-muted)]">
-        <p className="text-xs">No results</p>
+        <p className="text-sm font-medium">No results</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {results.results.slice(0, 5).map((result, idx) => (
         <div
           key={result.id}
-          className="p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
+          className="p-3 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
         >
-          <div className="flex items-start gap-2">
-            <div className="w-5 h-5 rounded bg-[var(--tiger-yellow)] flex items-center justify-center text-[10px] font-medium shrink-0 text-black">
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 rounded bg-[var(--tiger-yellow)] flex items-center justify-center text-xs font-bold shrink-0 text-black">
               {idx + 1}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="font-medium text-xs">{result.title}</h3>
-                <span className="text-[10px] font-mono text-[var(--tiger-muted)] shrink-0">
+                <h3 className="font-semibold text-sm text-white">{result.title}</h3>
+                <span className="text-xs font-mono text-[var(--tiger-muted)] shrink-0">
                   {typeof result.score === 'number' 
                     ? result.score.toFixed(4) 
                     : parseFloat(result.score)?.toFixed(4) ?? 'N/A'}
@@ -950,33 +950,33 @@ function HybridResultsList({ results }: { results: SearchResponse | null }) {
               />
               
               {result.matchAnalysis && (
-                <div className="flex flex-wrap gap-1 mt-1">
+                <div className="flex flex-wrap gap-1.5 mt-2">
                   {result.matchAnalysis.keywordRank && result.matchAnalysis.keywordRank !== 'N/A' && (
-                    <span className="text-[10px] px-1 py-0.5 rounded badge-yellow">
+                    <span className="text-xs px-2 py-1 rounded badge-yellow">
                       KW #{result.matchAnalysis.keywordRank}
                     </span>
                   )}
                   {result.matchAnalysis.vectorRank && result.matchAnalysis.vectorRank !== 'N/A' && (
-                    <span className="text-[10px] px-1 py-0.5 rounded badge-gray">
+                    <span className="text-xs px-2 py-1 rounded badge-gray">
                       Vec #{result.matchAnalysis.vectorRank}
                     </span>
                   )}
                   {result.matchAnalysis.vectorRank !== 'N/A' && result.matchAnalysis.keywordRank !== 'N/A' && (
-                    <span className="text-[10px] px-1 py-0.5 rounded badge-green">
+                    <span className="text-xs px-2 py-1 rounded badge-green">
                       Both ✓
                     </span>
                   )}
                 </div>
               )}
               
-              <span className="text-[10px] text-[var(--tiger-muted)]">{result.category}</span>
+              <span className="text-xs text-[var(--tiger-muted)] mt-1">{result.category}</span>
             </div>
           </div>
         </div>
       ))}
       
       {results.results.length > 5 && (
-        <p className="text-[10px] text-[var(--tiger-muted)] text-center pt-1">
+        <p className="text-xs text-[var(--tiger-muted)] text-center pt-1">
           +{results.results.length - 5} more
         </p>
       )}
@@ -1013,20 +1013,20 @@ function BM25ResultsList({ results, scoreThreshold }: { results: SearchResponse 
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {results.results.slice(0, 5).map((result, idx) => (
         <div
           key={result.id}
-          className="p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
+          className="p-3 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
         >
-          <div className="flex items-start gap-2">
-            <div className="w-5 h-5 rounded bg-[var(--tiger-yellow)] flex items-center justify-center text-[10px] font-medium shrink-0 text-black">
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 rounded bg-[var(--tiger-yellow)] flex items-center justify-center text-xs font-bold shrink-0 text-black">
               {idx + 1}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="font-medium text-xs">{result.title}</h3>
-                <span className="text-[10px] font-mono text-[var(--tiger-muted)] shrink-0">
+                <h3 className="font-semibold text-sm text-white">{result.title}</h3>
+                <span className="text-xs font-mono text-[var(--tiger-muted)] shrink-0">
                   {typeof result.score === 'number' 
                     ? result.score.toFixed(3) 
                     : parseFloat(result.score)?.toFixed(3) ?? 'N/A'}
@@ -1040,28 +1040,28 @@ function BM25ResultsList({ results, scoreThreshold }: { results: SearchResponse 
               
               {/* Show matched and missing terms */}
               {result.matchAnalysis && (
-                <div className="flex flex-wrap gap-1 mt-1">
+                <div className="flex flex-wrap gap-1.5 mt-2">
                   {result.matchAnalysis.matchedTerms.slice(0, 3).map(term => (
-                    <span key={term} className="text-[10px] px-1 py-0.5 rounded badge-green">
+                    <span key={term} className="text-xs px-2 py-1 rounded badge-green">
                       ✓ {term}
                     </span>
                   ))}
                   {result.matchAnalysis.missingTerms.slice(0, 2).map(term => (
-                    <span key={term} className="text-[10px] px-1 py-0.5 rounded badge-red opacity-60">
+                    <span key={term} className="text-xs px-2 py-1 rounded badge-red">
                       ✗ {term}
                     </span>
                   ))}
                 </div>
               )}
               
-              <span className="text-[10px] text-[var(--tiger-muted)]">{result.category}</span>
+              <span className="text-xs text-[var(--tiger-muted)] mt-1">{result.category}</span>
             </div>
           </div>
         </div>
       ))}
       
       {results.results.length > 5 && (
-        <p className="text-[10px] text-[var(--tiger-muted)] text-center pt-1">
+        <p className="text-xs text-[var(--tiger-muted)] text-center pt-1">
           +{results.results.length - 5} more
         </p>
       )}
@@ -1076,7 +1076,7 @@ function VectorResultsList({ results }: { results: SearchResponse | null }) {
         <svg className="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <p className="text-xs">Run a search</p>
+        <p className="text-sm">Run a search</p>
       </div>
     );
   }
@@ -1084,7 +1084,7 @@ function VectorResultsList({ results }: { results: SearchResponse | null }) {
   if ('error' in results) {
     return (
       <div className="text-center py-8 text-[var(--tiger-error)]">
-        <p className="text-xs">Error: {(results as unknown as { error: string }).error}</p>
+        <p className="text-sm">Error: {(results as unknown as { error: string }).error}</p>
       </div>
     );
   }
@@ -1092,13 +1092,13 @@ function VectorResultsList({ results }: { results: SearchResponse | null }) {
   if (!results.results || results.results.length === 0) {
     return (
       <div className="text-center py-8 text-[var(--tiger-muted)]">
-        <p className="text-xs">No results</p>
+        <p className="text-sm font-medium">No results</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {results.results.slice(0, 5).map((result, idx) => {
         const similarity = typeof result.score === 'number' ? result.score : parseFloat(result.score) || 0;
         const similarityPct = (similarity * 100).toFixed(0);
@@ -1106,21 +1106,21 @@ function VectorResultsList({ results }: { results: SearchResponse | null }) {
         return (
           <div
             key={result.id}
-            className="p-2.5 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
+            className="p-3 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
           >
-            <div className="flex items-start gap-2">
-              <div className="w-5 h-5 rounded bg-[var(--tiger-border)] flex items-center justify-center text-[10px] font-medium shrink-0">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded bg-[var(--tiger-border)] flex items-center justify-center text-xs font-bold shrink-0">
                 {idx + 1}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-medium text-xs">{result.title}</h3>
-                  <span className="text-[10px] font-mono text-[var(--tiger-muted)] shrink-0">
+                  <h3 className="font-semibold text-sm text-white">{result.title}</h3>
+                  <span className="text-xs font-mono text-[var(--tiger-muted)] shrink-0">
                     {similarityPct}%
                   </span>
                 </div>
                 <ContentSnippet content={result.content} />
-                <span className="text-[10px] text-[var(--tiger-muted)]">{result.category}</span>
+                <span className="text-xs text-[var(--tiger-muted)] mt-1">{result.category}</span>
               </div>
             </div>
           </div>
@@ -1128,7 +1128,7 @@ function VectorResultsList({ results }: { results: SearchResponse | null }) {
       })}
       
       {results.results.length > 5 && (
-        <p className="text-[10px] text-[var(--tiger-muted)] text-center pt-1">
+        <p className="text-xs text-[var(--tiger-muted)] text-center pt-1">
           +{results.results.length - 5} more
         </p>
       )}
@@ -1143,7 +1143,7 @@ function CollapsibleQueryBox({ explanation }: { explanation: string }) {
     <div className="mt-3 pt-3 border-t border-[var(--tiger-border)]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between text-[10px] text-[var(--tiger-muted)] hover:text-white transition-colors"
+        className="w-full flex items-center justify-between text-xs text-[var(--tiger-muted)] hover:text-white transition-colors"
       >
         <span className="flex items-center gap-1">
           <svg 
@@ -1160,9 +1160,9 @@ function CollapsibleQueryBox({ explanation }: { explanation: string }) {
       
       {isOpen && (
         <div className="mt-2 p-2 rounded bg-[var(--tiger-dark)] border border-[var(--tiger-border)] overflow-x-auto">
-          <pre className="text-[10px] font-mono text-[var(--tiger-muted)] whitespace-pre-wrap leading-relaxed">
+          <pre className="text-xs font-mono text-[var(--tiger-muted)] whitespace-pre-wrap leading-relaxed">
             {explanation}
-          </pre>
+            </pre>
         </div>
       )}
     </div>
