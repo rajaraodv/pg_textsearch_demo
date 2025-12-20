@@ -92,9 +92,14 @@ The long guide has more keyword matches, so native ranks it higher. But the shor
 
 **Search:** `database connection pooling`
 
-Native Postgres uses Boolean AND by default. If a doc has "connection pooling" but not "database"? No match. Zero results.
+Native Postgres uses Boolean AND by default (`plainto_tsquery`). Only docs with ALL three terms match. Result: 2 documents.
 
-BM25 does **ranked retrieval**. Docs matching 2 of 3 terms still appear, just ranked lower than docs matching all 3. You get results instead of nothing.
+You could switch to OR (`to_tsquery` with `|`). Now you get 13 results. But:
+- Rankings become flat (many docs score identical 0.02)
+- Spam still ranks in the middle
+- Hard to tell relevant from irrelevant
+
+BM25 does **ranked retrieval** properly. Every doc gets a meaningful score based on how well it matches. Docs with 2 of 3 terms rank lower than docs with all 3, but they still appear with differentiated scores.
 
 ---
 
