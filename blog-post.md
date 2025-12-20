@@ -69,6 +69,8 @@ Now watch what happens with different searches:
 
 Native counts keywords. More = better. BM25 applies **term frequency saturation**: after a few mentions, additional repetitions barely help. Spam loses.
 
+![Problem 1: Keyword Stuffing](./problem1.png)
+
 ### Problem 2: Common Words Dominate
 
 **Search:** `database authentication`
@@ -76,6 +78,8 @@ Native counts keywords. More = better. BM25 applies **term frequency saturation*
 Native treats both words equally. But "database" appears in 10+ docs. It tells you nothing. "Authentication" appears in only 1 doc. That's the signal.
 
 BM25 uses **Inverse Document Frequency (IDF)**. Rare terms get higher weight. The authentication doc jumps to #1 because "authentication" is the discriminating term.
+
+![Problem 2: Common Words Dominate](./problem2.png)
 
 ### Problem 3: Long Docs Always Win
 
@@ -87,6 +91,8 @@ BM25 uses **Inverse Document Frequency (IDF)**. Rare terms get higher weight. Th
 | #2: Quick EXPLAIN Tip (2 mentions) | #2: Complete Tuning Guide |
 
 The long guide has more keyword matches, so native ranks it higher. But the short tip is *entirely* about EXPLAIN ANALYZE. It's a better result. BM25 uses **length normalization** to fix this.
+
+![Problem 3: Long Docs Always Win](./problem3.png)
 
 ### Problem 4: All-or-Nothing Matching
 
@@ -100,6 +106,8 @@ You could switch to OR (`to_tsquery` with `|`). Now you get 13 results. But:
 - Hard to tell relevant from irrelevant
 
 BM25 does **ranked retrieval** properly. Every doc gets a meaningful score based on how well it matches. Docs with 2 of 3 terms rank lower than docs with all 3, but they still appear with differentiated scores.
+
+![Problem 4: All-or-Nothing Matching](./problem4.png)
 
 ---
 
