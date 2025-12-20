@@ -115,6 +115,13 @@ const DEMO_QUERIES = [
     highlight: 'length',
     category: 'length'
   },
+  // TF Saturation (k1) - prevents keyword stuffing
+  { 
+    query: 'database performance', 
+    description: 'Spam doc repeats "performance" 10x but BM25 prevents it from dominating',
+    highlight: 'saturation',
+    category: 'saturation'
+  },
   // AI/Agent scenarios
   { 
     query: 'fix my connection pool problems', 
@@ -468,46 +475,69 @@ export default function Home() {
           </div>
         </div>
 
-            {/* IDF & Length Normalization */}
-            <div className="mb-3 flex flex-wrap gap-4">
-              <div>
-                <div className="text-xs uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Rare Term Weighting (IDF)</div>
-                <div className="flex flex-wrap gap-2">
-                  {DEMO_QUERIES.filter(q => q.category === 'idf').map((item) => (
-          <button
-                      key={item.query}
-                      onClick={() => runDemoQuery(item.query, item.highlight)}
-                      disabled={loading}
-                      className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
-                        currentScenario === item.highlight 
-                          ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
-                          : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
-                      }`}
-                      title={item.description}
-                    >
-                      <div className="font-medium font-mono">{item.query}</div>
-          </button>
-                  ))}
+            {/* BM25 Feature Examples */}
+            <div className="mb-3">
+              <div className="text-xs uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">BM25 Feature Examples</div>
+              <div className="flex flex-wrap gap-4">
+                <div>
+                  <div className="text-[10px] text-[var(--tiger-muted)] mb-1.5">IDF (Rare Terms)</div>
+                  <div className="flex flex-wrap gap-2">
+                    {DEMO_QUERIES.filter(q => q.category === 'idf').map((item) => (
+                      <button
+                        key={item.query}
+                        onClick={() => runDemoQuery(item.query, item.highlight)}
+                        disabled={loading}
+                        className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
+                          currentScenario === item.highlight 
+                            ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
+                            : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
+                        }`}
+                        title={item.description}
+                      >
+                        <div className="font-medium font-mono">{item.query}</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Length Normalization</div>
-                <div className="flex flex-wrap gap-2">
-                  {DEMO_QUERIES.filter(q => q.category === 'length').map((item) => (
-          <button
-                      key={item.query}
-                      onClick={() => runDemoQuery(item.query, item.highlight)}
-                      disabled={loading}
-                      className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
-                        currentScenario === item.highlight 
-                          ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
-                          : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
-                      }`}
-                      title={item.description}
-                    >
-                      <div className="font-medium font-mono">{item.query}</div>
-          </button>
-                  ))}
+                <div>
+                  <div className="text-[10px] text-[var(--tiger-muted)] mb-1.5">TF Saturation (k₁)</div>
+                  <div className="flex flex-wrap gap-2">
+                    {DEMO_QUERIES.filter(q => q.category === 'saturation').map((item) => (
+                      <button
+                        key={item.query}
+                        onClick={() => runDemoQuery(item.query, item.highlight)}
+                        disabled={loading}
+                        className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
+                          currentScenario === item.highlight 
+                            ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
+                            : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
+                        }`}
+                        title={item.description}
+                      >
+                        <div className="font-medium font-mono">{item.query}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-[var(--tiger-muted)] mb-1.5">Length Norm (b)</div>
+                  <div className="flex flex-wrap gap-2">
+                    {DEMO_QUERIES.filter(q => q.category === 'length').map((item) => (
+                      <button
+                        key={item.query}
+                        onClick={() => runDemoQuery(item.query, item.highlight)}
+                        disabled={loading}
+                        className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
+                          currentScenario === item.highlight 
+                            ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
+                            : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
+                        }`}
+                        title={item.description}
+                      >
+                        <div className="font-medium font-mono">{item.query}</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -580,10 +610,20 @@ export default function Home() {
               
               {currentScenario === 'length' && (
                 <div>
-                  <h3 className="text-sm font-medium text-white mb-1">Length Normalization</h3>
+                  <h3 className="text-sm font-medium text-white mb-1">Length Normalization (b)</h3>
                   <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
                     Long doc has more keyword occurrences. Short doc has fewer but is more focused.
                     BM25 normalizes by length (b=0.75) so the short, focused tip can rank higher.
+                  </p>
+                </div>
+              )}
+
+              {currentScenario === 'saturation' && (
+                <div>
+                  <h3 className="text-sm font-medium text-white mb-1">TF Saturation (k₁)</h3>
+                  <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
+                    &quot;SEO Spam&quot; doc repeats &quot;performance&quot; 10× but doesn&apos;t dominate results.
+                    BM25&apos;s k₁ parameter creates diminishing returns — 10× mentions ≠ 10× score.
                   </p>
                 </div>
               )}

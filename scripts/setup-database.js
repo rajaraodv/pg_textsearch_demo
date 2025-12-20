@@ -152,6 +152,15 @@ const DOCUMENTS = [
     category: "security"
   },
 
+  // === TF SATURATION DEMO ===
+  {
+    title: "SEO Spam: Performance Tips",
+    // KEYWORD STUFFED - repeats "performance" many times (10x)
+    // BM25's k1 saturation prevents this from dominating results
+    content: "Performance performance performance. Database performance performance. Improve performance performance performance. Performance optimization performance tips.",
+    category: "spam"
+  },
+
   // === GENERAL/REFERENCE DOCS ===
   {
     title: "Database Fundamentals",
