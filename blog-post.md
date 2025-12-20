@@ -78,9 +78,15 @@ This is how RAG systems work. Both signals. One database.
 
 ---
 
-## Get Started
+## See It For Yourself
 
-**Option 1: Try the demo**
+We built a demo that runs all four search methods side-by-side: Native Postgres, BM25, Vector, and Hybrid. Same query, same documents, different results. You'll see exactly why BM25 wins.
+
+![Demo App](./app-image.png)
+
+Type a query. Watch Native Postgres fail on partial matches while BM25 finds what you need. See how Vector search understands meaning. Watch Hybrid combine both for the best results. No hand-waving—just run queries and compare.
+
+**Clone it:**
 ```bash
 git clone https://github.com/rajaraodv/pg_textsearch_demo.git
 cd pg_textsearch_demo
@@ -89,7 +95,7 @@ npm install
 npm run setup && npm run dev
 ```
 
-**Option 2: Just use it**
+**Or just use pg_textsearch directly:**
 ```sql
 CREATE EXTENSION pg_textsearch;
 CREATE INDEX docs_idx ON documents USING bm25(content) WITH (text_config='english');
