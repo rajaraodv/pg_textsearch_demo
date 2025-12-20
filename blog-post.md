@@ -108,6 +108,8 @@ You don't need Elasticsearch. You don't need Algolia. You don't need another ser
 
 You need [pg_textsearch](https://github.com/timescale/pg_textsearch).
 
-It's open source. PostgreSQL licensed. Already available on [Tiger Data](https://console.cloud.timescale.com).
+It's fully open source under the [PostgreSQL license](https://opensource.org/licenses/PostgreSQL)—the same highly permissive license as Postgres itself. Use it anywhere, for anything, no strings attached.
+
+Already available on [Tiger Data](https://console.cloud.timescale.com).
 
 **Just use Postgres.**
