@@ -1,12 +1,23 @@
 # Before You Add Elasticsearch, Try This
 
-Postgres is everywhere. Over half of developers use it. It's the database behind Stripe, Instagram, Spotify, and countless startups.
+Postgres is everywhere. Millions of developers use it and love it. It's the database behind Stripe, Instagram, Spotify, and countless startups.
 
-Search is everywhere too. Every app needs it. Product catalogs. Documentation. User content. Support tickets.
+Search is everywhere too. Every app needs it. Product catalogs. Documentation. User content. Support tickets. And now: AI agents and RAG pipelines that need to find the right documents before generating answers.
 
-So naturally, people try to use Postgres for search.
+So naturally, people try to use Postgres for search. And quickly hit its limits.
 
-And it works... until it doesn't.
+The usual next step? Add Elasticsearch. Or Algolia. Or Typesense. 
+
+Suddenly you're:
+- Spinning up another cluster (and keeping it running 24/7)
+- Building data sync pipelines between Postgres and your search system
+- Debugging why search results are stale or missing
+- Adding another system to your on-call rotation
+- Paying $1000s/month for a managed service, or hiring someone who knows how to run it
+
+What if Postgres search was just... better?
+
+It can be now. But first, let's look at what's actually wrong with native Postgres search.
 
 ---
 
@@ -98,6 +109,8 @@ BM25 (Best Matching 25) powers Elasticsearch, Solr, Lucene, and virtually every 
 
 **Ranked Retrieval** - Every doc gets a meaningful relevance score, not just "matches" or "doesn't match". Partial matches still appear, just ranked lower.
 
+![BM25 Components](./images/bm25-venn-diagram.png)
+
 This is how Google worked from the beginning. It's table stakes for search.
 
 ---
@@ -125,27 +138,6 @@ Same documents. Same queries. Different results:
 | `database connection pooling` | 2 results (AND) or flat scores (OR) | Ranked results, partial matches included |
 
 No new infrastructure. No data sync. Just better search.
-
----
-
-## "What About Elasticsearch?"
-
-Elasticsearch is great software. If you need:
-- Search across terabytes of logs
-- Real-time analytics on streaming data
-- Distributed search across hundreds of nodes
-- A dedicated search team to run it
-
-Then Elasticsearch is the right choice.
-
-But if you need search in your app, and you're already running Postgres, adding Elasticsearch means:
-- Another cluster to provision and monitor
-- Data sync pipelines to build and maintain
-- Network latency between your app and search
-- Another system in your on-call rotation
-- Another monthly bill
-
-For most apps, that's overkill. You don't need a search cluster. You need better search in the database you already have.
 
 ---
 
