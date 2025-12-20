@@ -50,6 +50,37 @@ type SearchResponse = {
   details?: string;
 };
 
+// Helper function to create a content snippet with highlighted matched terms
+function ContentSnippet({ content, matchedTerms, maxLength = 120 }: { content: string; matchedTerms?: string[]; maxLength?: number }) {
+  if (!content) return null;
+  
+  // Truncate content to maxLength
+  let snippet = content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
+  
+  if (!matchedTerms || matchedTerms.length === 0) {
+    return <p className="text-[10px] text-[var(--tiger-muted)] mt-1 leading-relaxed">{snippet}</p>;
+  }
+  
+  // Create a regex pattern for all matched terms (case insensitive)
+  const pattern = new RegExp(`(${matchedTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+  
+  // Split by matched terms and highlight them
+  const parts = snippet.split(pattern);
+  
+  return (
+    <p className="text-[10px] text-[var(--tiger-muted)] mt-1 leading-relaxed">
+      {parts.map((part, i) => {
+        const isMatch = matchedTerms.some(term => part.toLowerCase() === term.toLowerCase());
+        return isMatch ? (
+          <span key={i} className="text-[var(--tiger-yellow)] font-medium">{part}</span>
+        ) : (
+          <span key={i}>{part}</span>
+        );
+      })}
+    </p>
+  );
+}
+
 const DEMO_QUERIES = [
   // Traditional search scenarios
   { 
@@ -766,14 +797,19 @@ function ResultsPanel({
                   {idx + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-xs truncate">{result.title}</h3>
-                    <span className="text-[10px] font-mono text-[var(--tiger-muted)]">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-medium text-xs">{result.title}</h3>
+                    <span className="text-[10px] font-mono text-[var(--tiger-muted)] shrink-0">
                       {typeof result.score === 'number' 
                         ? result.score.toFixed(3) 
                         : parseFloat(result.score)?.toFixed(3) ?? 'N/A'}
                     </span>
                   </div>
+                  
+                  <ContentSnippet 
+                    content={result.content} 
+                    matchedTerms={result.matchAnalysis?.matchedTerms}
+                  />
                   
                   {result.matchAnalysis && (
                     <div className="flex flex-wrap gap-1 mt-1">
@@ -846,14 +882,19 @@ function HybridResultsList({ results }: { results: SearchResponse | null }) {
               {idx + 1}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium text-xs truncate">{result.title}</h3>
-                <span className="text-[10px] font-mono text-[var(--tiger-muted)]">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-medium text-xs">{result.title}</h3>
+                <span className="text-[10px] font-mono text-[var(--tiger-muted)] shrink-0">
                   {typeof result.score === 'number' 
                     ? result.score.toFixed(4) 
                     : parseFloat(result.score)?.toFixed(4) ?? 'N/A'}
                 </span>
               </div>
+              
+              <ContentSnippet 
+                content={result.content} 
+                matchedTerms={result.matchAnalysis?.matchedTerms}
+              />
               
               {result.matchAnalysis && (
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -930,14 +971,19 @@ function BM25ResultsList({ results, scoreThreshold }: { results: SearchResponse 
               {idx + 1}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium text-xs truncate">{result.title}</h3>
-                <span className="text-[10px] font-mono text-[var(--tiger-muted)]">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-medium text-xs">{result.title}</h3>
+                <span className="text-[10px] font-mono text-[var(--tiger-muted)] shrink-0">
                   {typeof result.score === 'number' 
                     ? result.score.toFixed(3) 
                     : parseFloat(result.score)?.toFixed(3) ?? 'N/A'}
                 </span>
               </div>
+              
+              <ContentSnippet 
+                content={result.content} 
+                matchedTerms={result.matchAnalysis?.matchedTerms}
+              />
               
               {/* Show matched and missing terms */}
               {result.matchAnalysis && (
@@ -1014,12 +1060,13 @@ function VectorResultsList({ results }: { results: SearchResponse | null }) {
                 {idx + 1}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-medium text-xs truncate">{result.title}</h3>
-                  <span className="text-[10px] font-mono text-[var(--tiger-muted)]">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-medium text-xs">{result.title}</h3>
+                  <span className="text-[10px] font-mono text-[var(--tiger-muted)] shrink-0">
                     {similarityPct}%
                   </span>
                 </div>
+                <ContentSnippet content={result.content} />
                 <span className="text-[10px] text-[var(--tiger-muted)]">{result.category}</span>
               </div>
             </div>
