@@ -120,9 +120,9 @@ const DOCUMENTS = [
     category: "reference"
   },
   {
-    title: "Making Your Database Faster",
-    // BEST for "make database faster" - has "faster" keyword + semantic match
-    content: "Make your database faster by optimizing slow queries. Improve response time with proper indexing. Faster queries mean better user experience. Use EXPLAIN to find bottlenecks. Consider query caching for repeated database operations.",
+    title: "Query Performance Optimization",
+    // For agent query "why are my queries slow" - semantic match, no direct keyword match
+    content: "Improve slow database response times through optimization techniques. Proper indexing reduces query latency significantly. Use EXPLAIN to identify bottlenecks. Query caching helps with repeated operations. Monitor and tune regularly for best performance.",
     category: "performance"
   },
   {
