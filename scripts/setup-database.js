@@ -155,9 +155,10 @@ const DOCUMENTS = [
   // === TF SATURATION DEMO ===
   {
     title: "SEO Spam: Performance Tips",
-    // KEYWORD STUFFED - repeats "performance" many times (10x)
-    // BM25's k1 saturation prevents this from dominating results
-    content: "Performance performance performance. Database performance performance. Improve performance performance performance. Performance optimization performance tips.",
+    // KEYWORD STUFFED - repeats "performance" 2x but NO "database" keyword
+    // Quality doc has both terms naturally + gets score from BOTH keywords
+    // Demonstrates: matching ALL query terms > repeating ONE term
+    content: "Performance performance. Speed tips for optimization.",
     category: "spam"
   },
 

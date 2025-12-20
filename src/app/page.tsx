@@ -622,8 +622,8 @@ export default function Home() {
                 <div>
                   <h3 className="text-sm font-medium text-white mb-1">TF Saturation (k₁)</h3>
                   <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
-                    &quot;SEO Spam&quot; doc repeats &quot;performance&quot; 10× but doesn&apos;t dominate results.
-                    BM25&apos;s k₁ parameter creates diminishing returns — 10× mentions ≠ 10× score.
+                    &quot;SEO Spam&quot; repeats &quot;performance&quot; but lacks &quot;database&quot;.
+                    BM25: quality doc with BOTH terms scores higher than spam with ONE repeated term.
                   </p>
                 </div>
               )}
