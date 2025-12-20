@@ -82,34 +82,42 @@ function ContentSnippet({ content, matchedTerms, maxLength = 120 }: { content: s
 }
 
 const DEMO_QUERIES = [
-  // Traditional search scenarios
+  // Keyword Search - showing partial matching and typo handling
+  { 
+    query: 'db connection pooling', 
+    description: '"db" doesn\'t match "database" — see which terms match (✓) vs miss (✗)',
+    highlight: 'partial-1',
+    category: 'keyword'
+  },
+  { 
+    query: 'datab connection pooling', 
+    description: 'Typo "datab" doesn\'t match — BM25 still finds results via other terms',
+    highlight: 'partial-2',
+    category: 'keyword'
+  },
   { 
     query: 'database connection pooling', 
-    description: 'Boolean vs Ranked: Native requires ALL terms, BM25 includes partial matches',
-    highlight: 'boolean',
-    category: 'traditional'
+    description: 'All terms match — compare Native (requires ALL) vs BM25 (ranks by relevance)',
+    highlight: 'full-match',
+    category: 'keyword'
   },
+  // IDF - rare term weighting
   { 
     query: 'database authentication', 
-    description: 'IDF Weighting: "authentication" (1 doc) is weighted higher than "database" (6 docs)',
+    description: '"authentication" (1/14 docs) weighted higher than "database" (8/14 docs)',
     highlight: 'idf',
-    category: 'traditional'
+    category: 'idf'
   },
+  // Length normalization
   { 
     query: 'explain analyze postgresql', 
-    description: 'Length Normalization: Long doc has more keywords, but BM25 favors focused short doc',
+    description: 'Short focused doc ranks higher than long doc with more keyword occurrences',
     highlight: 'length',
-    category: 'traditional'
+    category: 'length'
   },
-  // AI/Agent scenarios - designed to show Hybrid winning
+  // AI/Agent scenarios
   { 
-    query: 'why are my queries slow', 
-    description: '🤖 BM25 shows matched vs missing terms (✓/✗). Vector understands intent. Hybrid combines both.',
-    highlight: 'agent-speed',
-    category: 'agent'
-  },
-  { 
-    query: 'fix connection pool problems', 
+    query: 'fix my connection pool problems', 
     description: '🤖 Native: 0 results. BM25/Vector/Hybrid: all find troubleshooting guide.',
     highlight: 'agent-troubleshoot',
     category: 'agent'
@@ -123,14 +131,14 @@ const DEMO_QUERIES = [
 ];
 
 export default function Home() {
-  const [searchQuery, setSearchQuery] = useState('database connection pooling');
+  const [searchQuery, setSearchQuery] = useState('db connection pooling');
   const [nativeResults, setNativeResults] = useState<SearchResponse | null>(null);
   const [bm25Results, setBm25Results] = useState<SearchResponse | null>(null);
   const [vectorResults, setVectorResults] = useState<SearchResponse | null>(null);
   const [hybridResults, setHybridResults] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [dbStatus, setDbStatus] = useState<'unknown' | 'ready' | 'error'>('unknown');
-  const [currentScenario, setCurrentScenario] = useState<string | null>('boolean');
+  const [currentScenario, setCurrentScenario] = useState<string | null>('partial-1');
   // Single slider: 0 = 100% keyword, 50 = 50/50, 100 = 100% vector
   const [hybridMix, setHybridMix] = useState(50);
   // BM25 score threshold filter (0 = disabled, 1-5 = filter low scores)
@@ -390,9 +398,75 @@ export default function Home() {
           <div className="mt-4 p-4 rounded-lg bg-[var(--tiger-card)] border border-[var(--tiger-border)]">
             <div className="text-xs text-[var(--tiger-muted)] mb-3">Try these examples to see how different search methods compare:</div>
             
-            {/* AI Agent Queries - Featured first */}
-            <div className="mb-4">
-              <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-yellow)] mb-2 font-medium">🤖 AI Agent / RAG Queries</div>
+            {/* Keyword Search */}
+            <div className="mb-3">
+              <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Keyword Search</div>
+              <div className="flex flex-wrap gap-2">
+                {DEMO_QUERIES.filter(q => q.category === 'keyword').map((item) => (
+                  <button
+                    key={item.query}
+                    onClick={() => runDemoQuery(item.query, item.highlight)}
+                    disabled={loading}
+                    className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
+                      currentScenario === item.highlight 
+                        ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
+                        : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
+                    }`}
+                    title={item.description}
+                  >
+                    <div className="font-medium font-mono">{item.query}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* IDF & Length Normalization */}
+            <div className="mb-3 flex flex-wrap gap-4">
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Rare Term Weighting (IDF)</div>
+                <div className="flex flex-wrap gap-2">
+                  {DEMO_QUERIES.filter(q => q.category === 'idf').map((item) => (
+                    <button
+                      key={item.query}
+                      onClick={() => runDemoQuery(item.query, item.highlight)}
+                      disabled={loading}
+                      className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
+                        currentScenario === item.highlight 
+                          ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
+                          : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
+                      }`}
+                      title={item.description}
+                    >
+                      <div className="font-medium font-mono">{item.query}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Length Normalization</div>
+                <div className="flex flex-wrap gap-2">
+                  {DEMO_QUERIES.filter(q => q.category === 'length').map((item) => (
+                    <button
+                      key={item.query}
+                      onClick={() => runDemoQuery(item.query, item.highlight)}
+                      disabled={loading}
+                      className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
+                        currentScenario === item.highlight 
+                          ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
+                          : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
+                      }`}
+                      title={item.description}
+                    >
+                      <div className="font-medium font-mono">{item.query}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Agentic Queries */}
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-yellow)] mb-2 font-medium">🤖 Agentic Queries</div>
               <div className="flex flex-wrap gap-2">
                 {DEMO_QUERIES.filter(q => q.category === 'agent').map((item) => (
                   <button
@@ -406,39 +480,7 @@ export default function Home() {
                     }`}
                     title={item.description}
                   >
-                    <div className="font-medium">{item.query}</div>
-                    <div className={`text-[10px] mt-0.5 ${currentScenario === item.highlight ? 'text-black/70' : 'text-[var(--tiger-muted)]'}`}>
-                      {item.highlight === 'agent-speed' && 'Partial match + semantic intent'}
-                      {item.highlight === 'agent-troubleshoot' && 'Shows semantic understanding'}
-                      {item.highlight === 'agent-security' && 'Natural language → technical docs'}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Traditional Search Queries */}
-            <div>
-              <div className="text-[10px] uppercase tracking-wider text-[var(--tiger-muted)] mb-2 font-medium">Traditional Keyword Search</div>
-              <div className="flex flex-wrap gap-2">
-                {DEMO_QUERIES.filter(q => q.category === 'traditional').map((item) => (
-                  <button
-                    key={item.query}
-                    onClick={() => runDemoQuery(item.query, item.highlight)}
-                    disabled={loading}
-                    className={`group text-xs px-3 py-2 rounded-md border transition-all disabled:opacity-50 text-left ${
-                      currentScenario === item.highlight 
-                        ? 'bg-[var(--tiger-yellow)] border-[var(--tiger-yellow)] text-black' 
-                        : 'bg-[var(--tiger-dark)] border-[var(--tiger-border)] text-white hover:border-[var(--tiger-yellow)]'
-                    }`}
-                    title={item.description}
-                  >
-                    <div className="font-medium">{item.query}</div>
-                    <div className={`text-[10px] mt-0.5 ${currentScenario === item.highlight ? 'text-black/70' : 'text-[var(--tiger-muted)]'}`}>
-                      {item.highlight === 'boolean' && 'Boolean AND vs ranked'}
-                      {item.highlight === 'idf' && 'Rare term weighting (IDF)'}
-                      {item.highlight === 'length' && 'Length normalization'}
-                    </div>
+                    <div className="font-medium font-mono">{item.query}</div>
                   </button>
                 ))}
               </div>
@@ -448,13 +490,32 @@ export default function Home() {
           {/* Scenario Explanation */}
           {currentScenario && (
             <div className="mt-4 p-4 rounded-lg bg-[var(--tiger-card)] border border-[var(--tiger-border)]">
-              {currentScenario === 'boolean' && (
+              {currentScenario === 'partial-1' && (
                 <div>
-                  <h3 className="text-sm font-medium text-white mb-1">Boolean AND vs Ranked Retrieval</h3>
+                  <h3 className="text-sm font-medium text-white mb-1">Partial Match: &quot;db&quot; ≠ &quot;database&quot;</h3>
                   <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
-                    Native PostgreSQL requires ALL three words: &quot;database&quot; AND &quot;connection&quot; AND &quot;pooling&quot;. 
-                    Articles about connection pooling that don&apos;t mention &quot;database&quot; are excluded.
-                    BM25 ranks all documents by relevance — partial matches still appear, just scored lower.
+                    &quot;db&quot; doesn&apos;t match &quot;database&quot; — see the <span className="text-red-400">✗ db</span> in results.
+                    Native requires ALL terms to match. BM25 still returns results ranked by the terms that DO match.
+                  </p>
+                </div>
+              )}
+
+              {currentScenario === 'partial-2' && (
+                <div>
+                  <h3 className="text-sm font-medium text-white mb-1">Typo Handling: &quot;datab&quot;</h3>
+                  <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
+                    The typo &quot;datab&quot; doesn&apos;t match any document. Native fails completely.
+                    BM25 still finds relevant results via &quot;connection&quot; and &quot;pooling&quot;.
+                  </p>
+                </div>
+              )}
+
+              {currentScenario === 'full-match' && (
+                <div>
+                  <h3 className="text-sm font-medium text-white mb-1">Full Match: All Terms Present</h3>
+                  <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
+                    All three terms match. Native requires ALL terms (Boolean AND). 
+                    BM25 ranks by relevance — documents with rare terms rank higher.
                   </p>
                 </div>
               )}
@@ -463,8 +524,8 @@ export default function Home() {
                 <div>
                   <h3 className="text-sm font-medium text-white mb-1">IDF: Rare Terms Are More Meaningful</h3>
                   <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
-                    &quot;database&quot; appears in 6/10 docs — too common to be useful. &quot;authentication&quot; appears in only 1/10 docs — this is the discriminating term.
-                    BM25 gives ~4× higher weight to &quot;authentication&quot;. Native treats both equally.
+                    &quot;database&quot; appears in 8/14 docs — too common. &quot;authentication&quot; appears in only 1/14 docs — highly discriminating.
+                    BM25 weights &quot;authentication&quot; ~4× higher. The auth doc ranks #1.
                   </p>
                 </div>
               )}
@@ -473,36 +534,28 @@ export default function Home() {
                 <div>
                   <h3 className="text-sm font-medium text-white mb-1">Length Normalization</h3>
                   <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
-                    Long doc has 5× &quot;EXPLAIN&quot; and 7× &quot;PostgreSQL&quot;. Short doc has only 2× and 1×.
-                    Native ranks long doc #1 (more keywords). BM25 ranks short, focused tip #1 (keyword density matters more than raw count).
-                  </p>
-                </div>
-              )}
-
-              {currentScenario === 'agent-speed' && (
-                <div>
-                  <h3 className="text-sm font-medium text-white mb-1">🤖 Natural Language Query → Partial Matches</h3>
-                  <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
-                    All methods find results, but with different rankings. BM25 shows which terms matched (✓) and which didn&apos;t (✗).
-                    Vector ranks by semantic understanding of &quot;slow queries&quot; intent. Hybrid combines both for optimal ranking.
+                    Long doc has more keyword occurrences. Short doc has fewer but is more focused.
+                    BM25 normalizes by length (b=0.75) so the short, focused tip can rank higher.
                   </p>
                 </div>
               )}
 
               {currentScenario === 'agent-troubleshoot' && (
                 <div>
-                  <h3 className="text-sm font-medium text-white mb-1">🤖 Troubleshooting Query</h3>
+                  <h3 className="text-sm font-medium text-white mb-1">🤖 Agentic Query: Troubleshooting</h3>
                   <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
-                    Native: 0 results (requires ALL terms but &quot;fix&quot; isn&apos;t in docs). BM25/Vector/Hybrid all find &quot;Connection Pool Troubleshooting Guide&quot;.
+                    Native: 0 results (&quot;fix&quot; and &quot;my&quot; don&apos;t appear in docs). 
+                    BM25/Vector/Hybrid understand the intent and find &quot;Connection Pool Troubleshooting Guide&quot;.
                   </p>
                 </div>
               )}
 
               {currentScenario === 'agent-security' && (
                 <div>
-                  <h3 className="text-sm font-medium text-white mb-1">🤖 Security Query</h3>
+                  <h3 className="text-sm font-medium text-white mb-1">🤖 Agentic Query: Security</h3>
                   <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
-                    Native: 0 results (no doc matches all terms including &quot;my&quot;). BM25/Vector/Hybrid find &quot;Protecting Database Access&quot;.
+                    Native: 0 results (&quot;secure&quot; and &quot;my&quot; don&apos;t match). 
+                    Vector understands &quot;secure&quot; ≈ &quot;protect&quot; semantically. Hybrid combines keyword + semantic signals.
                   </p>
                 </div>
               )}
