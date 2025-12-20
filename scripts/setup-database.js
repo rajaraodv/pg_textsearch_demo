@@ -154,11 +154,11 @@ const DOCUMENTS = [
 
   // === TF SATURATION DEMO ===
   {
-    title: "SEO Spam: Performance Tips",
-    // KEYWORD STUFFED - repeats "performance" 2x but NO "database" keyword
-    // Quality doc has both terms naturally + gets score from BOTH keywords
-    // Demonstrates: matching ALL query terms > repeating ONE term
-    content: "Performance performance. Speed tips for optimization.",
+    title: "Generic Blog Post",
+    // SEO spam: "database" repeated many times in fluff content
+    // No useful information, just keyword stuffing
+    // BM25's TF saturation + length normalization should push this down
+    content: "Database database database. Learn about database. Database is important. Database database database. More database info. Database tips for database users. Database database database.",
     category: "spam"
   },
 

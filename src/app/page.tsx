@@ -115,10 +115,10 @@ const DEMO_QUERIES = [
     highlight: 'length',
     category: 'length'
   },
-  // TF Saturation (k1) - prevents keyword stuffing
+  // TF Saturation (k1) - prevents keyword stuffing  
   { 
-    query: 'database performance', 
-    description: 'Spam doc repeats "performance" 10x but BM25 prevents it from dominating',
+    query: 'database indexing', 
+    description: 'Spam doc stuffs "database" 10× but lacks "indexing". Quality docs with both terms win.',
     highlight: 'saturation',
     category: 'saturation'
   },
@@ -622,8 +622,8 @@ export default function Home() {
                 <div>
                   <h3 className="text-sm font-medium text-white mb-1">TF Saturation (k₁)</h3>
                   <p className="text-xs text-[var(--tiger-muted)] leading-relaxed">
-                    &quot;SEO Spam&quot; repeats &quot;performance&quot; but lacks &quot;database&quot;.
-                    BM25: quality doc with BOTH terms scores higher than spam with ONE repeated term.
+                    Spam doc stuffs &quot;database&quot; 10× but lacks &quot;indexing&quot;.
+                    Quality docs with BOTH terms rank higher. TF saturation limits keyword stuffing gains.
                   </p>
                 </div>
               )}
