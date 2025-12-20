@@ -793,7 +793,9 @@ function ResultsPanel({
   results: SearchResponse | null;
   variant: 'native' | 'bm25';
 }) {
+  const [expanded, setExpanded] = useState(false);
   const isNative = variant === 'native';
+  const displayCount = expanded ? results?.results?.length || 0 : 5;
 
   return (
     <div className="card p-4">
@@ -840,7 +842,7 @@ function ResultsPanel({
         </div>
       ) : (
         <div className="space-y-3">
-          {results.results.slice(0, 5).map((result, idx) => (
+          {results.results.slice(0, displayCount).map((result, idx) => (
             <div
               key={result.id}
               className="p-3 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
@@ -881,9 +883,12 @@ function ResultsPanel({
           ))}
           
           {results.results.length > 5 && (
-            <p className="text-xs text-[var(--tiger-muted)] text-center pt-2">
-              +{results.results.length - 5} more
-            </p>
+            <button 
+              onClick={() => setExpanded(!expanded)}
+              className="w-full text-xs text-[var(--tiger-yellow)] hover:text-white text-center pt-2 transition-colors"
+            >
+              {expanded ? '▲ Show less' : `▼ +${results.results.length - 5} more`}
+            </button>
           )}
         </div>
       )}
@@ -896,6 +901,9 @@ function ResultsPanel({
 }
 
 function HybridResultsList({ results }: { results: SearchResponse | null }) {
+  const [expanded, setExpanded] = useState(false);
+  const displayCount = expanded ? results?.results?.length || 0 : 5;
+
   if (!results) {
     return (
       <div className="text-center py-8 text-[var(--tiger-muted)]">
@@ -925,7 +933,7 @@ function HybridResultsList({ results }: { results: SearchResponse | null }) {
 
   return (
     <div className="space-y-3">
-      {results.results.slice(0, 5).map((result, idx) => (
+      {results.results.slice(0, displayCount).map((result, idx) => (
         <div
           key={result.id}
           className="p-3 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
@@ -976,15 +984,21 @@ function HybridResultsList({ results }: { results: SearchResponse | null }) {
       ))}
       
       {results.results.length > 5 && (
-        <p className="text-xs text-[var(--tiger-muted)] text-center pt-1">
-          +{results.results.length - 5} more
-        </p>
+        <button 
+          onClick={() => setExpanded(!expanded)}
+          className="w-full text-xs text-[var(--tiger-yellow)] hover:text-white text-center pt-2 transition-colors"
+        >
+          {expanded ? '▲ Show less' : `▼ +${results.results.length - 5} more`}
+        </button>
       )}
     </div>
   );
 }
 
 function BM25ResultsList({ results, scoreThreshold }: { results: SearchResponse | null; scoreThreshold: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const displayCount = expanded ? results?.results?.length || 0 : 5;
+
   if (!results) {
     return (
       <div className="text-center py-8 text-[var(--tiger-muted)]">
@@ -1014,7 +1028,7 @@ function BM25ResultsList({ results, scoreThreshold }: { results: SearchResponse 
 
   return (
     <div className="space-y-3">
-      {results.results.slice(0, 5).map((result, idx) => (
+      {results.results.slice(0, displayCount).map((result, idx) => (
         <div
           key={result.id}
           className="p-3 rounded-md bg-[var(--tiger-dark)] border border-[var(--tiger-border)] hover:border-[var(--tiger-yellow)]/50 transition-colors"
@@ -1061,15 +1075,21 @@ function BM25ResultsList({ results, scoreThreshold }: { results: SearchResponse 
       ))}
       
       {results.results.length > 5 && (
-        <p className="text-xs text-[var(--tiger-muted)] text-center pt-1">
-          +{results.results.length - 5} more
-        </p>
+        <button 
+          onClick={() => setExpanded(!expanded)}
+          className="w-full text-xs text-[var(--tiger-yellow)] hover:text-white text-center pt-2 transition-colors"
+        >
+          {expanded ? '▲ Show less' : `▼ +${results.results.length - 5} more`}
+        </button>
       )}
     </div>
   );
 }
 
 function VectorResultsList({ results }: { results: SearchResponse | null }) {
+  const [expanded, setExpanded] = useState(false);
+  const displayCount = expanded ? results?.results?.length || 0 : 5;
+
   if (!results) {
     return (
       <div className="text-center py-8 text-[var(--tiger-muted)]">
@@ -1099,7 +1119,7 @@ function VectorResultsList({ results }: { results: SearchResponse | null }) {
 
   return (
     <div className="space-y-3">
-      {results.results.slice(0, 5).map((result, idx) => {
+      {results.results.slice(0, displayCount).map((result, idx) => {
         const similarity = typeof result.score === 'number' ? result.score : parseFloat(result.score) || 0;
         const similarityPct = (similarity * 100).toFixed(0);
         
@@ -1128,9 +1148,12 @@ function VectorResultsList({ results }: { results: SearchResponse | null }) {
       })}
       
       {results.results.length > 5 && (
-        <p className="text-xs text-[var(--tiger-muted)] text-center pt-1">
-          +{results.results.length - 5} more
-        </p>
+        <button 
+          onClick={() => setExpanded(!expanded)}
+          className="w-full text-xs text-[var(--tiger-yellow)] hover:text-white text-center pt-2 transition-colors"
+        >
+          {expanded ? '▲ Show less' : `▼ +${results.results.length - 5} more`}
+        </button>
       )}
     </div>
   );
