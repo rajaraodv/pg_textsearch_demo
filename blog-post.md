@@ -69,7 +69,7 @@ Now watch what happens with different searches:
 
 Native counts keywords. More = better. BM25 applies **term frequency saturation**: after a few mentions, additional repetitions barely help. Spam loses.
 
-![Problem 1: Keyword Stuffing](./problem1.png)
+![Problem 1: Keyword Stuffing](./images/problem1-new.png)
 
 ### Problem 2: Common Words Dominate
 
@@ -79,7 +79,7 @@ Native treats both words equally. But "database" appears in 10+ docs. It tells y
 
 BM25 uses **Inverse Document Frequency (IDF)**. Rare terms get higher weight. The authentication doc jumps to #1 because "authentication" is the discriminating term.
 
-![Problem 2: Common Words Dominate](./problem2.png)
+![Problem 2: Common Words Dominate](./images/problem2-new.png)
 
 ### Problem 3: Long Docs Always Win
 
@@ -92,7 +92,7 @@ BM25 uses **Inverse Document Frequency (IDF)**. Rare terms get higher weight. Th
 
 The long guide has more keyword matches, so native ranks it higher. But the short tip is *entirely* about EXPLAIN ANALYZE. It's a better result. BM25 uses **length normalization** to fix this.
 
-![Problem 3: Long Docs Always Win](./problem3.png)
+![Problem 3: Long Docs Always Win](./images/problem3-new.png)
 
 ### Problem 4: All-or-Nothing Matching
 
@@ -107,11 +107,11 @@ You could switch to OR (`to_tsquery` with `|`). Now you get 13 results. But:
 
 BM25 does **ranked retrieval** properly. Every doc gets a meaningful score based on how well it matches. Docs with 2 of 3 terms rank lower than docs with all 3, but they still appear with differentiated scores.
 
-![Problem 4: All-or-Nothing Matching](./problem4.png)
+![Problem 4: All-or-Nothing Matching](./images/problem4-new.png)
 
 ---
 
-## What About Semantic Search?
+## What About Semantic Search (for AI Agents)?
 
 BM25 handles keywords. For meaning, you need vectors.
 
@@ -138,13 +138,15 @@ ORDER BY score DESC LIMIT 10;
 
 Both signals. One database. No external services.
 
+![Hybrid Search](./images/hybrid-search.png)
+
 ---
 
 ## See It For Yourself
 
 We built a demo that runs all four search methods side-by-side: Native Postgres, BM25, Vector, and Hybrid. Same query, same documents, different results. You'll see exactly why BM25 wins.
 
-![Demo App](./app-image.png)
+![Demo App](./images/app-image.png)
 
 Type a query. Watch Native Postgres fail on partial matches while BM25 finds what you need. See how Vector search understands meaning. Watch Hybrid combine both for the best results. No hand-waving. Just run queries and compare.
 

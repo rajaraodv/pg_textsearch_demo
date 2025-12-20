@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./banner.png" alt="pg_textsearch - Google-level search for PostgreSQL" width="100%">
+  <img src="./images/banner.png" alt="pg_textsearch - Google-level search for PostgreSQL" width="100%">
 </p>
 
 <h1 align="center">pg_textsearch Demo</h1>
@@ -17,7 +17,7 @@
 
 ---
 
-![Demo Screenshot](./app-image.png)
+![Demo Screenshot](./images/app-image.png)
 
 This demo showcases [Tiger Data's `pg_textsearch`](https://www.timescale.com/blog/introducing-pg_textsearch-true-bm25-ranking-hybrid-retrieval-postgres/) extension, which brings **BM25 ranking** and **hybrid search** directly into PostgreSQL.
 
