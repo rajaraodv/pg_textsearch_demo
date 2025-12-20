@@ -40,6 +40,7 @@ type SearchResponse = {
   query: string;
   queryTerms?: string[];
   termStats?: Record<string, { docFreq: number; idf: string }>;
+  totalDocs?: number;
   method: string;
   executionTime: number;
   explanation: string;
@@ -718,19 +719,20 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Term Stats */}
+                {/* Term Stats - Yellow = rare (high IDF), Gray = common (low IDF) */}
                 {bm25Results && 'termStats' in bm25Results && bm25Results.termStats && (
                   <div className="mb-3 flex flex-wrap gap-1.5">
                     {Object.entries(bm25Results.termStats).map(([term, stats]) => (
                       <span 
                         key={term}
-                        className={`text-xs px-2 py-1 rounded font-medium ${
+                        title={stats.docFreq <= 3 ? `Rare term (high IDF): weighted higher` : `Common term (low IDF): weighted lower`}
+                        className={`text-xs px-2 py-1 rounded font-medium cursor-help ${
                           stats.docFreq <= 3 
                             ? 'badge-yellow' 
                             : 'badge-gray'
                         }`}
                       >
-                        {term} ({stats.docFreq}/14)
+                        {term} ({stats.docFreq === 0 ? '0' : stats.docFreq}/{bm25Results.totalDocs || 15})
                       </span>
                     ))}
                   </div>

@@ -1,22 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
-// Estimate IDF for a term based on document frequency
-async function getTermStats(terms: string[]): Promise<Record<string, { docFreq: number; idf: string }>> {
+// Estimate IDF for a term based on document frequency (word boundary match)
+async function getTermStats(terms: string[]): Promise<{ stats: Record<string, { docFreq: number; idf: string }>; totalDocs: number }> {
   const stats: Record<string, { docFreq: number; idf: string }> = {};
   
+  // Get total document count
+  const totalResult = await query(`SELECT COUNT(*) as total FROM documents`);
+  const totalDocs = parseInt(totalResult.rows[0].total);
+  
   for (const term of terms) {
+    // Use word boundary matching with regex: \m = word start, \M = word end in PostgreSQL
     const result = await query(
-      `SELECT COUNT(*) as freq FROM documents WHERE LOWER(title || ' ' || content) LIKE $1`,
-      [`%${term.toLowerCase()}%`]
+      `SELECT COUNT(*) as freq FROM documents WHERE LOWER(title || ' ' || content) ~ $1`,
+      [`\\m${term.toLowerCase()}\\M`]
     );
     const docFreq = parseInt(result.rows[0].freq);
-    const totalDocs = 10; // We have 10 docs
     const idf = docFreq === 0 ? 'N/A' : (Math.log((totalDocs - docFreq + 0.5) / (docFreq + 0.5) + 1)).toFixed(2);
     stats[term] = { docFreq, idf: docFreq === 0 ? 'N/A' : idf };
   }
   
-  return stats;
+  return { stats, totalDocs };
 }
 
 export async function POST(request: NextRequest) {
@@ -35,8 +39,8 @@ export async function POST(request: NextRequest) {
     // Get query terms for analysis (allow 2+ character terms like "db", "ai", etc.)
     const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length >= 2);
     
-    // Get term statistics (IDF values)
-    const termStats = await getTermStats(terms);
+    // Get term statistics (IDF values) and total doc count
+    const { stats: termStats, totalDocs } = await getTermStats(terms);
 
     // BM25 search using pg_textsearch
     // The <@> operator returns BM25 distance (lower = better match) with:
@@ -142,6 +146,7 @@ export async function POST(request: NextRequest) {
       query: searchQuery,
       queryTerms: terms,
       termStats,
+      totalDocs,
       method: 'bm25',
       scoreThreshold: hasThreshold ? scoreThreshold : null,
       filteredCount: hasThreshold ? `Showing results with score ≥ ${scoreThreshold}` : null,
