@@ -898,7 +898,8 @@ function ResultsPanel({
 }) {
   const [expanded, setExpanded] = useState(false);
   const isNative = variant === 'native';
-  const displayCount = expanded ? results?.results?.length || 0 : 5;
+  const resultsList = results && 'results' in results ? results.results : [];
+  const displayCount = expanded ? resultsList.length : 5;
 
   return (
     <div className="card p-4">
@@ -1005,7 +1006,8 @@ function ResultsPanel({
 
 function HybridResultsList({ results }: { results: SearchResponse | null }) {
   const [expanded, setExpanded] = useState(false);
-  const displayCount = expanded ? results?.results?.length || 0 : 5;
+  const resultsList = results && 'results' in results ? results.results : [];
+  const displayCount = expanded ? resultsList.length : 5;
 
   if (!results) {
     return (
@@ -1100,7 +1102,8 @@ function HybridResultsList({ results }: { results: SearchResponse | null }) {
 
 function BM25ResultsList({ results, scoreThreshold }: { results: SearchResponse | null; scoreThreshold: number }) {
   const [expanded, setExpanded] = useState(false);
-  const displayCount = expanded ? results?.results?.length || 0 : 5;
+  const resultsList = results && 'results' in results ? results.results : [];
+  const displayCount = expanded ? resultsList.length : 5;
 
   if (!results) {
     return (
@@ -1191,7 +1194,8 @@ function BM25ResultsList({ results, scoreThreshold }: { results: SearchResponse 
 
 function VectorResultsList({ results }: { results: SearchResponse | null }) {
   const [expanded, setExpanded] = useState(false);
-  const displayCount = expanded ? results?.results?.length || 0 : 5;
+  const resultsList = results && 'results' in results ? results.results : [];
+  const displayCount = expanded ? resultsList.length : 5;
 
   if (!results) {
     return (
