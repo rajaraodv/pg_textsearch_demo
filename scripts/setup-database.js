@@ -6,15 +6,22 @@
  * This script sets up the complete database for the BM25 demo:
  * 1. Creates the documents table
  * 2. Enables required extensions (pg_textsearch, vectorscale)
- * 3. Inserts sample documents
- * 4. Generates OpenAI embeddings for all documents
- * 5. Creates BM25 and DiskANN indexes
+ * 3. Reads documents from data/documents/ folder
+ * 4. Inserts documents into the database
+ * 5. Generates OpenAI embeddings for all documents
+ * 6. Creates BM25 and DiskANN indexes
  * 
  * Required environment variables (from .env.local):
  * - DATABASE_URL: PostgreSQL connection string
  * - OPENAI_API_KEY: OpenAI API key for generating embeddings
  * 
  * Usage: node scripts/setup-database.js
+ * 
+ * To add your own documents:
+ * 1. Create a new .md file in data/documents/
+ * 2. Add frontmatter with title and category
+ * 3. Add your content after the frontmatter
+ * 4. Run this script to reload all documents
  */
 
 const { Pool } = require('pg');
@@ -65,121 +72,99 @@ const pool = new Pool({
 });
 
 // ============================================================================
-// SAMPLE DOCUMENTS DATA
+// DOCUMENT LOADING FROM FILES
 // ============================================================================
 
-// ============================================================================
-// DOCUMENT DESIGN STRATEGY:
-// 
-// For agent queries to show Hybrid winning:
-// 1. Native should FAIL (Boolean AND + missing keywords)
-// 2. BM25 should find PARTIAL matches (keywords only)
-// 3. Vector should find SEMANTIC matches (meaning only)
-// 4. Hybrid should find the BEST answer (has BOTH keywords AND meaning)
-//
-// Key: Create docs where the BEST answer has both keyword AND semantic signals
-// ============================================================================
+/**
+ * Parse a markdown file with YAML frontmatter
+ * Format:
+ * ---
+ * title: Document Title
+ * category: category-name
+ * ---
+ * 
+ * Document content goes here...
+ */
+function parseMarkdownFile(filePath) {
+  const content = fs.readFileSync(filePath, 'utf-8');
+  
+  // Check for frontmatter
+  if (!content.startsWith('---')) {
+    throw new Error(`File ${filePath} is missing frontmatter`);
+  }
+  
+  // Find the end of frontmatter
+  const endIndex = content.indexOf('---', 3);
+  if (endIndex === -1) {
+    throw new Error(`File ${filePath} has invalid frontmatter (missing closing ---)`);
+  }
+  
+  // Parse frontmatter
+  const frontmatter = content.substring(3, endIndex).trim();
+  const frontmatterLines = frontmatter.split('\n');
+  const metadata = {};
+  
+  for (const line of frontmatterLines) {
+    const colonIndex = line.indexOf(':');
+    if (colonIndex > 0) {
+      const key = line.substring(0, colonIndex).trim();
+      const value = line.substring(colonIndex + 1).trim();
+      metadata[key] = value;
+    }
+  }
+  
+  // Get content after frontmatter
+  const documentContent = content.substring(endIndex + 3).trim();
+  
+  if (!metadata.title) {
+    throw new Error(`File ${filePath} is missing required 'title' in frontmatter`);
+  }
+  
+  return {
+    title: metadata.title,
+    content: documentContent,
+    category: metadata.category || 'general',
+    sourceFile: path.basename(filePath)
+  };
+}
 
-const DOCUMENTS = [
-  // === CONNECTION POOLING DOCS ===
-  {
-    title: "Database Connection Pooling Guide",
-    content: "Database connection pooling improves application performance. A pool maintains reusable connections. Configure pool size based on workload. Monitor connection usage regularly.",
-    category: "tutorial"
-  },
-  {
-    title: "PgBouncer Configuration",
-    content: "PgBouncer manages database connection pooling efficiently. Install PgBouncer on your server. Configure pooling mode: session, transaction, or statement. Set max_client_conn appropriately.",
-    category: "tutorial"
-  },
-  {
-    title: "Connection Pool Troubleshooting Guide",
-    // BEST for "fix connection pool problems" - has troubleshooting context + connection pool keywords
-    content: "Troubleshoot connection pool issues effectively. Common problems include pool exhaustion, connection leaks, and timeout errors. Monitor active connections. Check for connection leaks in application code. Increase pool size if needed.",
-    category: "troubleshooting"
-  },
-  {
-    title: "Scaling Web Applications",
-    // Semantic about high-traffic but doesn't use "pooling" much
-    content: "Scale your web application for high traffic. Use load balancers. Implement caching strategies. Database connections should be managed efficiently to prevent bottlenecks under load.",
-    category: "architecture"
-  },
-
-  // === PERFORMANCE DOCS ===
-  {
-    title: "EXPLAIN ANALYZE Quick Tip",
-    // SHORT doc (15 words) - focused on EXPLAIN, for length normalization demo
-    content: "Use EXPLAIN ANALYZE to find slow PostgreSQL queries. Shows execution plan and actual timing.",
-    category: "tip"
-  },
-  {
-    title: "Complete PostgreSQL Query Tuning Guide",
-    // LONG doc (80+ words) - comprehensive, many keyword occurrences
-    // For length normalization demo: more total keyword occurrences than short doc
-    content: "This comprehensive PostgreSQL guide covers query tuning and optimization. PostgreSQL query performance depends on proper use of EXPLAIN and EXPLAIN ANALYZE. Run EXPLAIN ANALYZE on slow queries. The EXPLAIN output shows the query planner decisions. PostgreSQL indexing improves query speed. Use EXPLAIN to verify index usage. ANALYZE updates PostgreSQL statistics. Monitor PostgreSQL query performance with pg_stat_statements. This PostgreSQL tuning guide helps optimize database queries.",
-    category: "reference"
-  },
-  {
-    title: "Query Performance Optimization",
-    // For agent query "why are my queries slow" - semantic match, no direct keyword match
-    content: "Improve slow database response times through optimization techniques. Proper indexing reduces query latency significantly. Use EXPLAIN to identify bottlenecks. Query caching helps with repeated operations. Monitor and tune regularly for best performance.",
-    category: "performance"
-  },
-  {
-    title: "Index Optimization Strategies",
-    // Good for optimization but not specifically about "speed"
-    content: "Optimize database indexes for better query performance. Create indexes on frequently filtered columns. Use composite indexes for multi-column queries. Remove unused indexes to speed up writes.",
-    category: "performance"
-  },
-
-  // === SECURITY DOCS ===
-  {
-    title: "PostgreSQL Authentication Setup",
-    // Has auth keywords but not "secure" or "protect"
-    content: "Set up PostgreSQL authentication methods. Configure pg_hba.conf for password, certificate, and LDAP authentication. Manage user roles and permissions. Enable SSL for encrypted client connections.",
-    category: "security"
-  },
-  {
-    title: "Protecting Database Access",
-    // BEST for "secure my postgres" - has "protect" (semantic to secure) + SSL/auth keywords
-    content: "Protect your PostgreSQL database from unauthorized access. Implement strong authentication. Use SSL certificates for encrypted connections. Configure firewall rules. Enable audit logging for security monitoring.",
-    category: "security"
-  },
-  {
-    title: "Database Encryption Guide",
-    // About encryption but not about auth/access
-    content: "Encrypt sensitive data in your database. Use column-level encryption for PII. Implement transparent data encryption. Manage encryption keys securely. Comply with data protection regulations.",
-    category: "security"
-  },
-
-  // === TF SATURATION DEMO ===
-  {
-    title: "Generic Blog Post",
-    // SEO spam: "database" repeated many times in fluff content
-    // No useful information, just keyword stuffing
-    // BM25's TF saturation + length normalization should push this down
-    content: "Database database database. Learn about database. Database is important. Database database database. More database info. Database tips for database users. Database database database.",
-    category: "spam"
-  },
-
-  // === GENERAL/REFERENCE DOCS ===
-  {
-    title: "Database Fundamentals",
-    content: "Database fundamentals every developer should know. Database design principles. Normalization techniques. Basic indexing strategies. Introduction to SQL queries.",
-    category: "tutorial"
-  },
-  {
-    title: "PostgreSQL Administration Handbook",
-    content: "Comprehensive PostgreSQL administration guide. Covers installation, configuration, backup strategies, replication setup, monitoring solutions, and maintenance tasks for production deployments.",
-    category: "reference"
-  },
-  {
-    title: "PostgreSQL vs MySQL Comparison",
-    content: "Comparing PostgreSQL and MySQL databases. PostgreSQL offers better standards compliance and advanced features. MySQL has wider hosting support. Both support replication and high availability.",
-    category: "comparison"
-  },
-
-];
+/**
+ * Load all documents from the data/documents/ folder
+ */
+function loadDocumentsFromFolder() {
+  const docsFolder = path.join(__dirname, '..', 'data', 'documents');
+  
+  if (!fs.existsSync(docsFolder)) {
+    console.error(`❌ Documents folder not found: ${docsFolder}`);
+    console.error('   Please create the folder and add .md files');
+    process.exit(1);
+  }
+  
+  const files = fs.readdirSync(docsFolder).filter(f => 
+    f.endsWith('.md') && !f.toLowerCase().startsWith('readme')
+  );
+  
+  if (files.length === 0) {
+    console.error(`❌ No .md files found in ${docsFolder}`);
+    process.exit(1);
+  }
+  
+  console.log(`Found ${files.length} document files in data/documents/\n`);
+  
+  const documents = [];
+  
+  for (const file of files) {
+    const filePath = path.join(docsFolder, file);
+    try {
+      const doc = parseMarkdownFile(filePath);
+      documents.push(doc);
+    } catch (e) {
+      console.error(`  ⚠ Error parsing ${file}: ${e.message}`);
+    }
+  }
+  
+  return documents;
+}
 
 // ============================================================================
 // OPENAI EMBEDDING FUNCTION
@@ -257,10 +242,10 @@ async function createTable() {
   console.log('  ✓ Created documents table\n');
 }
 
-async function insertDocuments() {
-  console.log('Step 4: Inserting sample documents...');
+async function insertDocuments(documents) {
+  console.log('Step 4: Inserting documents from files...');
   
-  for (const doc of DOCUMENTS) {
+  for (const doc of documents) {
     const wordCount = (doc.title + ' ' + doc.content).split(/\s+/).length;
     
     await pool.query(`
@@ -268,9 +253,9 @@ async function insertDocuments() {
       VALUES ($1, $2, $3, $4, to_tsvector('english', $1 || ' ' || $2))
     `, [doc.title, doc.content, doc.category, wordCount]);
     
-    console.log(`  ✓ Inserted: "${doc.title}"`);
+    console.log(`  ✓ Inserted: "${doc.title}" (from ${doc.sourceFile})`);
   }
-  console.log(`  ✓ Inserted ${DOCUMENTS.length} documents total\n`);
+  console.log(`  ✓ Inserted ${documents.length} documents total\n`);
 }
 
 async function generateEmbeddings() {
@@ -418,11 +403,19 @@ async function main() {
   console.log(`Database: ${DATABASE_URL.replace(/:[^:@]+@/, ':****@')}`);
   console.log(`OpenAI Key: ${OPENAI_API_KEY.substring(0, 10)}...${OPENAI_API_KEY.slice(-4)}\n`);
   
+  // Load documents from files
+  const documents = loadDocumentsFromFolder();
+  
+  if (documents.length === 0) {
+    console.error('❌ No valid documents loaded');
+    process.exit(1);
+  }
+  
   try {
     await dropExistingTables();
     await enableExtensions();
     await createTable();
-    await insertDocuments();
+    await insertDocuments(documents);
     await generateEmbeddings();
     await createIndexes();
     await verifySetup();
@@ -431,6 +424,10 @@ async function main() {
     console.log('║                    ✅ Setup Complete!                      ║');
     console.log('╚════════════════════════════════════════════════════════════╝\n');
     console.log('You can now run the demo app with: npm run dev\n');
+    console.log('To add your own documents:');
+    console.log('  1. Create a new .md file in data/documents/');
+    console.log('  2. Add frontmatter (title, category) and content');
+    console.log('  3. Run: npm run setup\n');
     
   } catch (error) {
     console.error('\n❌ Setup failed:', error.message);
@@ -441,4 +438,3 @@ async function main() {
 }
 
 main();
-
