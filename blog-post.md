@@ -21,35 +21,58 @@ That's it. Google-quality search ranking. In your existing database. No new infr
 
 ## "But Native Postgres Search Sucks"
 
-You're right. It does.
+You're right. It does. Let me show you why.
 
-Native `ts_rank` treats search as a boolean problem—documents match or they don't. It has no concept of *relevance*. A spammy doc that repeats "database" 50 times ranks higher than a helpful tutorial that mentions it twice.
+Say you have these 5 documents:
 
-**BM25 fixes this.** It's been the gold standard for search ranking since the 90s. Here's what it does:
+| Doc | Title | Content |
+|-----|-------|---------|
+| 1 | Connection Pooling Guide | "Database connection pooling improves performance..." |
+| 2 | PostgreSQL Authentication | "Set up database authentication with SSL..." |
+| 3 | SEO Spam | "Database database database. Database tips. Database database..." |
+| 4 | Quick EXPLAIN Tip | "Use EXPLAIN ANALYZE to find slow queries." (15 words) |
+| 5 | Complete Tuning Guide | "Comprehensive PostgreSQL guide... EXPLAIN... ANALYZE... performance..." (200 words) |
 
-### 1. Term Frequency Saturation
-Mentioning a word 50 times doesn't make a document 50× more relevant. BM25 caps the benefit. Keyword stuffing doesn't work.
+Now watch what happens with different searches:
 
-### 2. Rare Terms Matter More  
-"database" appears everywhere—useless for ranking. "authentication" appears in 1 doc—that's the signal. BM25 weights rare terms higher automatically.
+### Problem 1: Keyword Stuffing Wins
 
-### 3. Length Normalization
-A 50-word tip entirely about your query beats a 5,000-word manual that mentions it once. BM25 normalizes for document length.
+**Search:** `database`
 
-### 4. Partial Matching
-Search for "database connection pooling" and only 2 words match? Native Postgres returns nothing. BM25 returns ranked results.
+| Native Postgres | BM25 |
+|-----------------|------|
+| #1: SEO Spam (20 mentions!) | #1: Connection Pooling Guide |
+| #2: Connection Pooling | #2: Authentication |
+| #3: Authentication | #3: SEO Spam (pushed down) |
 
----
+Native counts keywords. More = better. BM25 applies **term frequency saturation**—after a few mentions, additional repetitions barely help. Spam loses.
 
-## The Comparison
+### Problem 2: Common Words Dominate
 
-| | Native `ts_rank` | BM25 |
-|---|---|---|
-| Ranking | Boolean | Probabilistic |
-| Spam resistance | Easily gamed | Resistant |
-| Rare terms | Ignored | Weighted |
-| Long docs | Favored | Normalized |
-| Partial match | ❌ Fails | ✅ Works |
+**Search:** `database authentication`
+
+Native treats both words equally. But "database" appears in almost every doc—it tells you nothing. "Authentication" appears in only one doc—that's the signal.
+
+BM25 uses **Inverse Document Frequency (IDF)**. Rare terms get higher weight. The authentication doc jumps to #1.
+
+### Problem 3: Long Docs Always Win
+
+**Search:** `EXPLAIN ANALYZE`
+
+| Native Postgres | BM25 |
+|-----------------|------|
+| #1: Complete Tuning Guide (8 mentions) | #1: Quick EXPLAIN Tip |
+| #2: Quick EXPLAIN Tip (2 mentions) | #2: Complete Tuning Guide |
+
+The long guide has more keyword matches, so native ranks it higher. But the short tip is *entirely* about EXPLAIN ANALYZE—it's a better result. BM25 uses **length normalization** to fix this.
+
+### Problem 4: All-or-Nothing Matching
+
+**Search:** `database connection pooling`
+
+Native Postgres uses Boolean AND by default. If a doc has "connection pooling" but not "database"? No match. Zero results.
+
+BM25 does **partial matching**. Docs matching 2 of 3 terms still rank—just lower than docs matching all 3. You actually get results.
 
 ---
 
