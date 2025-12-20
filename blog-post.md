@@ -4,9 +4,9 @@ You want good search. So you're evaluating Elasticsearch. Or Algolia. Or Typesen
 
 **Stop.**
 
-You already have Postgres. And now Postgres has BM25.
+You already have Postgres. And now Postgres has [BM25](https://en.wikipedia.org/wiki/Okapi_BM25).
 
-BM25 is the ranking algorithm behind Elasticsearch, Solr, Lucene, and virtually every production search system. It's also the retrieval backbone of modern AI: LangChain, LlamaIndex, Cohere Rerank, and most RAG pipelines use BM25 for first-stage retrieval before reranking. When AI search tools like Perplexity or ChatGPT with browsing fetch documents, BM25 is doing the heavy lifting.
+BM25 (Best Matching 25) is the ranking algorithm behind Elasticsearch, Solr, Lucene, and virtually every production search system. It's also the retrieval backbone of modern AI: LangChain, LlamaIndex, Cohere Rerank, and most RAG pipelines use BM25 for first-stage retrieval before reranking. When AI search tools like Perplexity or ChatGPT with browsing fetch documents, BM25 is doing the heavy lifting.
 
 ```sql
 CREATE EXTENSION pg_textsearch;
@@ -181,3 +181,12 @@ It's fully open source under the [PostgreSQL license](https://opensource.org/lic
 Already available on [Tiger Data](https://console.cloud.timescale.com).
 
 **Just use Postgres.**
+
+---
+
+## Learn More
+
+- [pg_textsearch GitHub](https://github.com/timescale/pg_textsearch) - Source code and examples
+- [pg_textsearch Documentation](https://www.tigerdata.com/docs/use-timescale/latest/extensions/pg-textsearch) - Full reference
+- [Introducing pg_textsearch](https://www.tigerdata.com/blog/introducing-pg_textsearch-true-bm25-ranking-hybrid-retrieval-postgres) - Deep dive blog post
+- [BM25 Algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Okapi_BM25) - How the ranking math works
