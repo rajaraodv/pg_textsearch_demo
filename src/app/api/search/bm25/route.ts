@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get query terms for analysis
-    const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+    // Get query terms for analysis (allow 2+ character terms like "db", "ai", etc.)
+    const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length >= 2);
     
     // Get term statistics (IDF values)
     const termStats = await getTermStats(terms);

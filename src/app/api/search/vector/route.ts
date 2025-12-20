@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get query terms for analysis
-    const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+    const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length >= 2);
 
     // Generate real OpenAI embedding for the query (1536 dimensions)
     const queryEmbedding = await getOpenAIEmbedding(searchQuery);

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get query terms for analysis
-    const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+    const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length >= 2);
 
     // Native PostgreSQL full-text search using ts_rank
     // This demonstrates the limitations:
