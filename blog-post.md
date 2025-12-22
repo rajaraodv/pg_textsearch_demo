@@ -15,6 +15,10 @@ Suddenly you're:
 - Adding another system to your on-call rotation
 - Paying $1000s/month for a managed service, or hiring someone who knows how to run it
 
+Yes, the 1% might need this. Elasticsearch for petabyte-scale log aggregation. Clickhouse for real-time analytics. Google and OpenAI build bespoke infrastructure.
+
+But the 99% don't need that complexity. They need better search in the database they already have.
+
 What if Postgres search was just... better?
 
 It can be now. But first, let's look at what's actually wrong with native Postgres search.
@@ -54,42 +58,33 @@ Let me show you. Say you have these documents:
 
 Now watch what happens:
 
-### Search: `database`
+### Problem 1: Keyword Stuffing Wins
 
-| Native Postgres | What You'd Expect |
-|-----------------|-------------------|
-| #1: Generic Blog Post (12 mentions!) | #1: Connection Pooling Guide |
-| #2: Connection Pooling Guide | #2: Something useful |
-| #3: ... | #3: Not spam |
-
-Native Postgres counts keywords. More mentions = higher rank. The spammy post wins.
+When you search for `database`, Native Postgres ranks by keyword count. The spam doc with "database" repeated 12 times ranks #1. The actual useful guides rank lower.
 
 ![Problem 1: Keyword Stuffing](./images/problem1-new.png)
 
-### Search: `database authentication`
+### Problem 2: Common Words Dominate
 
-Native Postgres treats both words equally. But "database" appears in almost every doc. It's noise. "Authentication" appears in one doc. That's the signal.
+When you search for `database authentication`, "database" appears in 10+ docs. "Authentication" appears in 1. Which word actually identifies what you're looking for?
 
-Native doesn't know the difference.
+Native Postgres treats them equally. BM25 knows "authentication" is the signal.
 
 ![Problem 2: Common Words](./images/problem2-new.png)
 
-### Search: `EXPLAIN ANALYZE`
+### Problem 3: Long Documents Win
 
-| Native Postgres | What You'd Expect |
-|-----------------|-------------------|
-| #1: 80-word guide (8 mentions) | #1: Quick Tip (entirely about this) |
-| #2: 15-word tip (2 mentions) | #2: Long guide (mentions it) |
+When you search for `EXPLAIN ANALYZE`, the 80-word guide mentions it 8 times. The 15-word tip mentions it 2 times. Native ranks the long doc higher.
 
-Longer docs have more keyword matches, so they rank higher. But the short tip is *entirely* about EXPLAIN ANALYZE. It's the better result.
+But the short tip is *entirely* about EXPLAIN ANALYZE. It's the better result.
 
 ![Problem 3: Long Docs Win](./images/problem3-new.png)
 
-### Search: `database connection pooling`
+### Problem 4: All-or-Nothing Matching
 
-Native uses Boolean AND by default. Only docs with ALL three terms match. You get 2 results out of 15.
+When you search for `database connection pooling`, Native uses Boolean AND. Only docs with ALL three terms match. You get 2 results out of 15.
 
-Switch to OR? Now you get 13 results, but they all have the same score. No way to tell which is actually relevant.
+Switch to OR? You get 13 results, but many have identical scores. No way to tell which is actually relevant.
 
 ![Problem 4: All-or-Nothing](./images/problem4-new.png)
 
@@ -141,19 +136,31 @@ No new infrastructure. No data sync. Just better search.
 
 ---
 
-## Hybrid Search (for AI)
+## But What About AI Agents?
 
-BM25 handles keywords. For semantic understanding, you need vectors.
+Remember the intro? AI agents and RAG pipelines need search too. And they have a problem BM25 alone can't solve.
 
-The best AI retrieval systems use both. This is why:
-- [LangChain's EnsembleRetriever](https://python.langchain.com/docs/how_to/ensemble_retriever/) combines BM25 + vectors
-- [Cohere recommends BM25](https://docs.cohere.com/docs/reranking-best-practices) as first-stage retrieval before reranking
-- [Pinecone added hybrid search](https://docs.pinecone.io/guides/data/understanding-hybrid-search) combining sparse (BM25-style) and dense vectors
+When a user asks *"why is my database slow?"*, there's no keyword match to *"query optimization"* or *"index tuning"*. BM25 finds nothing. The agent fails.
 
-Postgres can do this too. With [pgvector](https://github.com/pgvector/pgvector), you run BM25 + vectors in one query:
+Vector search understands meaning. It knows "slow database" relates to "performance optimization." But vectors have the opposite problem: they're fuzzy. Search for `error PG-1234` and vectors return generic error docs, not the one with your exact error code.
+
+**The fix: use both.**
+
+| Query | BM25 finds | Vectors find | Hybrid finds |
+|-------|------------|--------------|--------------|
+| `error PG-1234` | Doc with exact code | Generic error docs | ✓ Exact code doc |
+| `why is my database slow` | Nothing (no keyword match) | Performance optimization docs | ✓ Performance docs |
+| `fix connection timeout` | Timeout config docs | Troubleshooting guides | ✓ Both, ranked by relevance |
+
+This is why every major AI search system uses hybrid:
+- [LangChain's EnsembleRetriever](https://python.langchain.com/docs/how_to/ensemble_retriever/) - BM25 + vectors with Reciprocal Rank Fusion
+- [Cohere Rerank](https://docs.cohere.com/docs/reranking-best-practices) - recommends BM25 as first-stage retrieval
+- [Pinecone](https://docs.pinecone.io/guides/data/understanding-hybrid-search) - added hybrid search combining sparse and dense vectors
+
+Postgres can do this too. With [pgvector](https://github.com/pgvector/pgvector):
 
 ```sql
--- Hybrid search with Reciprocal Rank Fusion
+-- Hybrid search: BM25 + vectors combined with Reciprocal Rank Fusion
 WITH bm25 AS (
   SELECT id, ROW_NUMBER() OVER (ORDER BY content <@> to_bm25query($1)) as rank
   FROM docs LIMIT 20
@@ -167,7 +174,7 @@ FROM bm25 FULL JOIN vector USING (id)
 ORDER BY score DESC LIMIT 10;
 ```
 
-Keywords + meaning. One database.
+Keywords for precision. Vectors for understanding. One database.
 
 ![Hybrid Search](./images/hybrid-search.png)
 
